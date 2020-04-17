@@ -34,7 +34,6 @@ These are all the python libraries _.py_ that provide the necessary classes and 
 2. _materials.py_ - material classes. Currently the following material models are available: stl1, con1.
 3. _sections.py_ - section classes. Currently the following section models are available: rss, rccs and rcts.
 6. _adaptic.py_ - this defines the *adaptic* class for post-processing.
-7. _postproc.py_ - set of functions specifically defined for efficient plotting and post-processing the results.
 
 ### 3. Documentation
 
