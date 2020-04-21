@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-import common
+import utils
 
 class con1:
     def __init__(self, ID, fc1, length, epsilon_t2 = 0.001, fc2_factor = 0.1, ft_factor = 1, characteristic = True):
@@ -32,7 +32,7 @@ class con1:
         self.Et2 = - int(round(self.ft /(self.epsilon_2t - self.epsilon_1t), -2))
         
     def adaptic_print(self):
-        line = common.str_joint([self.ID,'con1', self.Ec1, self.fc1, self.Ec2, self.fc2, self.Et1, 
+        line = utils.str_joint([self.ID,'con1', self.Ec1, self.fc1, self.Ec2, self.fc2, self.Et1, 
                                       self.ft, self.Et2, self.alpha])
         return line
         
@@ -60,7 +60,7 @@ class stl1:
         self.hardening = round(self.E2 / E1,7)
         
     def adaptic_print(self):
-        line = common.str_joint([self.ID,'stl1', self.E1, self.fy, self.hardening])
+        line = utils.str_joint([self.ID,'stl1', self.E1, self.fy, self.hardening])
         return line
         
     def data_frame(self):

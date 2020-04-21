@@ -30,7 +30,7 @@ This folder contains images and miscellaneous data used to obtain certain proper
 
 These are all the python libraries _.py_ that provide the necessary classes and functions to run the analyses. These were designed for pre-processing and post-processing data in _ADAPTIC_. 
 
-1. _common.py_ - contains miscellaneous functions and classes used through the entire project.
+1. _utils.py_ - contains miscellaneous functions and classes used through the entire project.
 2. _materials.py_ - material classes. Currently the following material models are available: stl1, con1.
 3. _sections.py_ - section classes. Currently the following section models are available: rss, rccs and rcts.
 6. _adaptic.py_ - this defines the *adaptic* class for post-processing.

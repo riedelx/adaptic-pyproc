@@ -1,7 +1,7 @@
 import pickle
 import numpy as np
 import matplotlib.pyplot as plt
-import common
+import utils
 import math
 
 class rss:
@@ -15,7 +15,7 @@ class rss:
         # convert dictionary values of different dimensionality to a flatten list
         line = self.__dict__
         line = np.array(list(line.values()))
-        return common.str_joint(line)
+        return utils.str_joint(line)
 
 class rccs:
     def __init__(self, ID, reinf_mat, unconf_mat, conf_mat, hc1, bc1, cover, links, reinf):
@@ -43,7 +43,7 @@ class rccs:
         dict2 = np.array(list(dict0.values())[8])
         dict2 = [val for sublist in dict2 for val in sublist]
         line = np.hstack((dict1,dict2))
-        return common.str_joint(line)
+        return utils.str_joint(line)
         
 class rcts:
     def __init__(self, ID, reinf_mat, unconf_mat, conf_mat, Df, Dw, Bf, Bw, cover, links, reinf):
@@ -79,4 +79,4 @@ class rcts:
         dict2 = np.array(list(dict0.values())[12])
         dict2 = [val for sublist in dict2 for val in sublist]
         line = np.hstack((dict1,dict2))
-        return common.str_joint(line)
+        return utils.str_joint(line)
