@@ -56,8 +56,8 @@ class stl1:
         self.fu = fu
         self.epsilon_u = round(epsilon_u,3)
         self.epsilon_y = round(fy / E1,4)
-        self.E2 = round((fu - fy) / (epsilon_u / self.epsilon_y),1)
-        self.hardening = round(self.E2 / E1,7)
+        self.E2 = round((fu - fy) / (epsilon_u - self.epsilon_y),1)
+        self.mu = round(self.E2 / E1,7)
         
     def adaptic_print(self):
         line = utils.str_joint([self.ID,'stl1', self.E1, self.fy, self.hardening])
@@ -65,8 +65,12 @@ class stl1:
         
     def data_frame(self):
         data = np.array([[self.ID, self.E1, self.E2, self.fy, self.fu, self.epsilon_y, self.epsilon_u, 
-                          self.hardening]])
+                          self.mu]])
         df = pd.DataFrame(data,index=data[:,0])
         df.columns = ['ID', '$$E_{1}[MPa]$$', '$$E_{2}[MPa]$$', '$$f_{y}[MPa]$$', '$$f_{u}[MPa]$$',
                       '$$e_{y}$$','$$e_{u}$$','$$mu$$']
+        return df
+    
+    def stress_df(self):
+        df = pd.DataFrame([[0,0],[self.epsilon_y,self.fy],[self.epsilon_u,self.fu]],columns=['strain','stress'])
         return df
