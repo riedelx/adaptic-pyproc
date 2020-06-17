@@ -60,7 +60,7 @@ class stl1:
         self.mu = round(self.E2 / E1,7)
         
     def adaptic_print(self):
-        line = utils.str_joint([self.ID,'stl1', self.E1, self.fy, self.hardening])
+        line = utils.str_joint([self.ID,'stl1', self.E1, self.fy, self.mu])
         return line
         
     def data_frame(self):

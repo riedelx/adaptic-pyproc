@@ -223,9 +223,13 @@ class adaptic:
 
     # alternative constructor
     @classmethod
-    def readFile(cls, title, cutoff = None):
+    def readFile(cls, title, cutoff = None,folderPath=""):
         wordsNum=[]
-        for data in open(title+str(".num"),'r'):
+        if folderPath != "":
+            path=folderPath
+        else:
+            path='data/'
+        for data in open(path+title+str(".num"),'r'):
             wordsNum.append(data.split())
         if cutoff:
             for i in range(len(wordsNum)):
