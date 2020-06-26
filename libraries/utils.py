@@ -26,26 +26,38 @@ def dict2lst(obj): return list(obj.__dict__.values())
 def csv2np(fname):
     with open(fname) as f:
         # skip comment line manually using generator expression
-        lines = (line for line in f if not line.startswith('#')) 
+        lines = (line for line in f if not line.startswith('#'))
         FH = np.loadtxt(lines, delimiter='	', skiprows=1)
     return FH
- 
+
 def custom_plot():
-    fig, ax = plt.subplots() 
+    fig, ax = plt.subplots()
     ax.grid(which='major', linestyle=':', linewidth='0.5', color='black')
-    
+
 def closestPoint(point, listTo, listFrom):
     index = next(x[0] for x in enumerate(listFrom) if x[1] > point)
     return np.array([float(listTo[index]), float(listFrom[index])])
 
 def df_index(df,val,col_ID): return df.index[df[col_ID] == val].tolist()[0]
 
-def df_value(df,val,col_ID0, col_ID1): 
+def df_value(df,val,col_ID0, col_ID1):
     return df.loc[df_index(df,val,col_ID0)][col_ID1]
 
 def name_gen(string,lst, start_ID = 1):
     return [string + x for x in np.arange(start_ID,start_ID + len(lst),1).astype(str)]
-    
+
+# disp1 = 1 # mm
+# disp2 = 2 # mm
+# disp3 = 3 # mm
+# ultDispPos = disp3
+# ultDispNeg = -disp3
+# f1 = 5 # N
+# f2 = 6 # N
+# f3 = 7 # N
+# negative=np.array([[-1,-0],[-5,-0],[-5,-0]])
+# astr1 = utils.create_ASTR(np.array([[disp1, f1],[disp2, f2],[disp3, f3]]),negative=negative)
+# utils.ASTR_plot(astr1, ultDispPos, ultDispNeg, 'ASTR curve','displacement [mm]', 'force [kN]', scaleX = 1, scaleY = 1E-3)
+
 def create_ASTR(positive, negative = []):
     if negative == []:
         negative = np.negative(positive)
@@ -56,13 +68,19 @@ def create_ASTR(positive, negative = []):
         k1 = (y1)/(x1)
         x2 = i[1][0]
         y2 = i[1][1]
-        k2 = (y2 - y1)/(x2 - x1)
+        if x2==x1:
+            k2=k1
+        else:
+            k2 = (y2 - y1)/(x2 - x1)
         x3 = i[2][0]
         y3 = i[2][1]
-        k3 = (y3 - y2)/(x3 - x2)
+        if x2==x3:
+            k3=k2
+        else:
+            k3 = (y3 - y2)/(x3 - x2)
         ASTR.extend((k1,x1,k2,x2,k3))
     return ASTR
-    
+
 def ASTR_plot(lst, ult_p, ult_n, title, x_label, y_label, scaleX = 1, scaleY = 1):
     lst = lst[1:]
     positive = lst[0:5]
@@ -86,7 +104,7 @@ def ASTR_plot(lst, ult_p, ult_n, title, x_label, y_label, scaleX = 1, scaleY = 1
             ASTR_neg = np.flip(np.array([[0,0],[x1,y1],[x2,y2],[x3,y3]]), axis = 0)
         positive_bool = False
     ASTR_xy = np.vstack((ASTR_neg,ASTR_pos))
-    fig, ax = plt.subplots() 
+    fig, ax = plt.subplots()
     ax.grid(which='major', linestyle=':', linewidth='0.5', color='black')
     plt.plot(ASTR_xy[:,0] * scaleX,ASTR_xy[:,1] * scaleY)
     plt.xlabel(x_label)
