@@ -10,7 +10,7 @@ class rss:
         self.mat = mat
         self.b = b
         self.d = d
-        
+
     def adaptic_print(self):
         # convert dictionary values of different dimensionality to a flatten list
         line = self.__dict__
@@ -35,7 +35,7 @@ class rccs:
         self.area = hc1 * bc1
         self.cover = cover
         self.links = links # links diameter
-    
+
     def adaptic_print(self):
         # convert dictionary values of different dimensionality to a flatten list
         dict0 = self.__dict__
@@ -44,7 +44,7 @@ class rccs:
         dict2 = [val for sublist in dict2 for val in sublist]
         line = np.hstack((dict1,dict2))
         return utils.str_joint(line)
-        
+
 class rcts:
     def __init__(self, ID, reinf_mat, unconf_mat, conf_mat, Df, Dw, Bf, Bw, cover, links, reinf):
         self.ID = ID
@@ -54,7 +54,7 @@ class rcts:
         self.Df = Df
         self.Dw = Dw
         self.df = Df - cover * 2 - links
-        self.db = cover + Dw
+        self.db = Dw # + cover
         self.Bf = Bf
         self.Bw = Bw
         self.bf = Bf - 2 * cover - links
@@ -71,7 +71,7 @@ class rcts:
         self.area = area_w + area_f
         self.centr_top = int((Df*area_f/2+area_w*(Df+Dw/2))/self.area)
         self.centr_bot = int(Df + Dw- self.centr_top)
-    
+
     def adaptic_print(self):
         # convert dictionary values of different dimensionality to a flatten list
         dict0 = self.__dict__

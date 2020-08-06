@@ -34,6 +34,11 @@ def custom_plot():
     fig, ax = plt.subplots()
     ax.grid(which='major', linestyle=':', linewidth='0.5', color='black')
 
+def find_nearest(array, value): #numpy
+    array = np.asarray(array)
+    idx = (np.abs(array - value)).argmin()
+    return array[idx],idx
+
 def closestPoint(point, listTo, listFrom):
     index = next(x[0] for x in enumerate(listFrom) if x[1] > point)
     return np.array([float(listTo[index]), float(listFrom[index])])
@@ -63,21 +68,28 @@ def create_ASTR(positive, negative = []):
         negative = np.negative(positive)
     ASTR = ['astr']
     for i in [positive, negative]:
-        x1 = i[0][0]
-        y1 = i[0][1]
-        k1 = (y1)/(x1)
-        x2 = i[1][0]
-        y2 = i[1][1]
-        if x2==x1:
-            k2=k1
+        if len(i) == 1 and i == ['soft']:
+            k1 = 1
+            x1 = -0
+            k2 = 0
+            x2 = -1
+            k3 = 0
         else:
-            k2 = (y2 - y1)/(x2 - x1)
-        x3 = i[2][0]
-        y3 = i[2][1]
-        if x2==x3:
-            k3=k2
-        else:
-            k3 = (y3 - y2)/(x3 - x2)
+            x1 = i[0][0]
+            y1 = i[0][1]
+            k1 = (y1)/(x1)
+            x2 = i[1][0]
+            y2 = i[1][1]
+            if x2==x1:
+                k2=k1
+            else:
+                k2 = (y2 - y1)/(x2 - x1)
+            x3 = i[2][0]
+            y3 = i[2][1]
+            if x2==x3:
+                k3=k2
+            else:
+                k3 = (y3 - y2)/(x3 - x2)
         ASTR.extend((k1,x1,k2,x2,k3))
     return ASTR
 
