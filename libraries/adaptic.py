@@ -179,6 +179,7 @@ class adaptic:
 
     def All(self):
         self.hasAttribute("nodeDispX")
+        self.hasAttribute("nodeDispY")
         self.hasAttribute("nodeDispRZ")
         self.hasAttribute("elementM1")
         self.hasAttribute("elementM2")
@@ -229,7 +230,7 @@ class adaptic:
             path=folderPath
         else:
             path='data/'
-        for data in open(path+title+str(".num"),'r'):
+        for data in open(path+str('/num/')+title+str(".num"),'r'):
             wordsNum.append(data.split())
         if cutoff:
             for i in range(len(wordsNum)):

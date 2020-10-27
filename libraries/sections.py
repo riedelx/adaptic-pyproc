@@ -1,5 +1,6 @@
 import pickle
 import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
 import utils
 import math
@@ -10,6 +11,7 @@ class rss:
         self.mat = mat
         self.b = b
         self.d = d
+        self.area= b * d
 
     def adaptic_print(self):
         # convert dictionary values of different dimensionality to a flatten list
@@ -30,6 +32,7 @@ class rccs:
         # each layer of reinforcement given as: [no of bars, diameter, distance from the bottom fibre]
         # reinforcement given as a list [[layer_1], [layer_2],..., [layer_n]]
         # layers order starting from the furtherst layer from the bottom fibre
+        reinf = pd.DataFrame(reinf).sort_values(by=[2],ascending=False).astype(int).values.tolist()
         self.reinf = [[int(math.pi*i[1]**2/4 * i[0]), i[2]] for i in reinf]
         self.reinf_basic = reinf # [no of bars, diameter, distance from the bottom fibre]
         self.area = hc1 * bc1
@@ -62,6 +65,7 @@ class rcts:
         # each layer of reinforcement given as: [no of bars, diameter, distance from the bottom fibre]
         # reinforcement given as a list [[layer_1], [layer_2],..., [layer_n]]
         # layers order starting from the furtherst layer from the bottom fibre
+        reinf = pd.DataFrame(reinf).sort_values(by=[2],ascending=False).astype(int).values.tolist()
         self.reinf = [[int(math.pi*i[1]**2/4 * i[0]), i[2]] for i in reinf]
         self.reinf_basic = reinf # [no of bars, diameter, distance from the bottom fibre]
         self.cover = cover
