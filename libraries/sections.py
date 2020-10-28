@@ -16,7 +16,7 @@ class rss:
     def adaptic_print(self):
         # convert dictionary values of different dimensionality to a flatten list
         line = self.__dict__
-        line = np.array(list(line.values()))
+        line = np.array(list(line.values())[0:4])
         return utils.str_joint(line)
 
 class rccs:
