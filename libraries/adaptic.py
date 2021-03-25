@@ -18,7 +18,8 @@ class adaptic:
                     if convType == "int":
                         tempVal = int(wordsNum[jRow][column])
                     elif convType == "float":
-                        tempVal = float(wordsNum[jRow][column])
+                        try: tempVal = float(wordsNum[jRow][column])
+                        except: tempVal = float(0)
                     elif convType == "str":
                         tempVal = wordsNum[jRow][column]
                     tempVector.append(tempVal)
@@ -67,6 +68,9 @@ class adaptic:
         self.hasAttribute('nodeDispMax')
         self.pseudo = self.pseudoStatic(self.LF, self.nodeDispMax)
 
+    def time_create(self):
+        self.time = self.convertNum(self.wordsNum,"#io1",2,2,"float")
+
     def gaussName_create(self):
         temp1 = self.convertNum(self.wordsNum,"#ie1s",3,0,"str")
         temp2 = self.convertNum(self.wordsNum,"#ie1s",3,1,"str")
@@ -82,8 +86,8 @@ class adaptic:
     def jelName_create(self):
         self.jelName = self.convertNum(self.wordsNum,"#ie11",3,0,"str")
 
-    def lnk2Name_create(self):
-        self.lnk2Name = self.convertNum(self.wordsNum,"#ie18",3,0,"str")
+    def lnkName_create(self):
+        self.lnkName = self.convertNum(self.wordsNum,"#ie18",3,0,"str")
 
     def nodeDispX_create(self):
         self.hasAttribute("nodeName")
@@ -133,17 +137,17 @@ class adaptic:
         self.hasAttribute("jelName")
         self.jelM = self.convertNum(self.wordsNum,"#ie11",3,3,"float")
 
-    def lnk2M1_create(self):
-        self.hasAttribute("lnk2Name")
-        self.lnk2M1 = self.convertNum(self.wordsNum,"#ie18",3,1,"float")
+    def lnkM1_create(self):
+        self.hasAttribute("lnkName")
+        self.lnkM1 = self.convertNum(self.wordsNum,"#ie18",3,1,"float")
 
-    def lnk2M2_create(self):
-        self.hasAttribute("lnk2Name")
-        self.lnk2M2 = self.convertNum(self.wordsNum,"#ie18",3,2,"float")
+    def lnkM2_create(self):
+        self.hasAttribute("lnkName")
+        self.lnkM2 = self.convertNum(self.wordsNum,"#ie18",3,2,"float")
 
-    def lnk2F_create(self):
-        self.hasAttribute("lnk2Name")
-        self.lnk2F = self.convertNum(self.wordsNum,"#ie18",3,3,"float")
+    def lnkF_create(self):
+        self.hasAttribute("lnkName")
+        self.lnkF = self.convertNum(self.wordsNum,"#ie18",3,3,"float")
 
     def gauss1StrainB_create(self):
         self.hasAttribute("gaussName")
@@ -152,6 +156,18 @@ class adaptic:
     def gauss1StrainT_create(self):
         self.hasAttribute("gaussName")
         self.gauss1StrainT = self.convertNum(self.wordsNum,"#ie1s",3,4,"float")
+
+    def gauss1StrainAv_create(self):
+        self.hasAttribute("gauss1StrainT")
+        self.hasAttribute("gauss1StrainB")
+        self.hasAttribute("gaussName")
+        self.gauss1StrainAv = (self.gauss1StrainT+self.gauss1StrainB)/2
+
+    def gauss2StrainAv_create(self):
+        self.hasAttribute("gauss2StrainT")
+        self.hasAttribute("gauss2StrainB")
+        self.hasAttribute("gaussName")
+        self.gauss2StrainAv = (self.gauss2StrainT+self.gauss2StrainB)/2
 
     def gauss1StressB_create(self):
         self.hasAttribute("gaussName")
@@ -177,6 +193,80 @@ class adaptic:
         self.hasAttribute("gaussName")
         self.gauss2StressT = self.convertNum(self.wordsNum,"#ie1s",3,9,"float")
 
+    def bndName_create(self):
+        self.bndName = self.convertNum(self.wordsNum,"#ie23",3,0,"str")
+
+    def bndM1_create(self):
+        self.hasAttribute("bndName")
+        self.bndM1 = self.convertNum(self.wordsNum,"#ie23",3,1,"float")
+
+    def bndM2_create(self):
+        self.hasAttribute("bndName")
+        self.bndM2 = self.convertNum(self.wordsNum,"#ie23",3,2,"float")
+
+    def bndF_create(self):
+        self.hasAttribute("bndName")
+        self.bndF = self.convertNum(self.wordsNum,"#ie23",3,3,"float")
+
+    def bndGaussName_create(self):
+        temp1 = self.convertNum(self.wordsNum,"#ie23s",3,0,"str")
+        temp2 = self.convertNum(self.wordsNum,"#ie23s",3,1,"str")
+        self.bndGaussName = np.array([temp1[i]+"_"+temp2[i] for i in range(len(temp2))])
+        del temp1, temp2
+
+    def bndStrain_create(self):
+        self.hasAttribute("bndGaussName")
+        self.bndStrain = self.convertNum(self.wordsNum,"#ie23s",3,2,"float")
+
+    def bndStress_create(self):
+        self.hasAttribute("bndGaussName")
+        self.bndStress = self.convertNum(self.wordsNum,"#ie23s",3,3,"float")
+
+    def bndSlip_create(self):
+        self.hasAttribute("bndGaussName")
+        self.bndSlip = self.convertNum(self.wordsNum,"#ie23s",3,4,"float")
+
+    def bndBond_create(self):
+        self.hasAttribute("bndGaussName")
+        self.bndBond = self.convertNum(self.wordsNum,"#ie23s",3,5,"float")
+
+    def cncName_create(self):
+        self.cncName = self.convertNum(self.wordsNum,"#ie24",3,0,"str")
+
+    def cncM1_create(self):
+        self.hasAttribute("cncName")
+        self.cncM1 = self.convertNum(self.wordsNum,"#ie24",3,1,"float")
+
+    def cncM2_create(self):
+        self.hasAttribute("cncName")
+        self.cncM2 = self.convertNum(self.wordsNum,"#ie24",3,2,"float")
+
+    def cncF_create(self):
+        self.hasAttribute("cncName")
+        self.cncF = self.convertNum(self.wordsNum,"#ie24",3,3,"float")
+
+    def cncGaussName_create(self):
+        temp1 = self.convertNum(self.wordsNum,"#ie24s",3,0,"str")
+        temp2 = self.convertNum(self.wordsNum,"#ie24s",3,1,"str")
+        self.cncGaussName = np.array([temp1[i]+"_"+temp2[i] for i in range(len(temp2))])
+        del temp1, temp2
+
+    def cncStrain_create(self):
+        self.hasAttribute("cncGaussName")
+        self.cncStrain = self.convertNum(self.wordsNum,"#ie24s",3,2,"float")
+
+    def cncStress_create(self):
+        self.hasAttribute("cncGaussName")
+        self.cncStress = self.convertNum(self.wordsNum,"#ie24s",3,3,"float")
+
+    def cncGamma_create(self):
+        self.hasAttribute("cncGaussName")
+        self.cncGamma = self.convertNum(self.wordsNum,"#ie24s",3,4,"float")
+
+    def cncTau_create(self):
+        self.hasAttribute("cncGaussName")
+        self.cncTau = self.convertNum(self.wordsNum,"#ie24s",3,5,"float")
+
     def All(self):
         self.hasAttribute("nodeDispX")
         self.hasAttribute("nodeDispY")
@@ -187,13 +277,29 @@ class adaptic:
         self.hasAttribute("jelF")
         self.hasAttribute("jelV")
         self.hasAttribute("jelM")
-        self.hasAttribute("lnk2M1")
-        self.hasAttribute("lnk2M2")
-        self.hasAttribute("lnk2F")
+        self.hasAttribute("lnkM1")
+        self.hasAttribute("lnkM2")
+        self.hasAttribute("lnkF")
         self.hasAttribute("gauss1StrainB")
         self.hasAttribute("gauss1StrainT")
         self.hasAttribute("gauss2StressB")
         self.hasAttribute("gauss2StressT")
+        self.hasAttribute("gauss1StrainAv")
+        self.hasAttribute("gauss1StrainAv")
+        self.hasAttribute("bndM1")
+        self.hasAttribute("bndM2")
+        self.hasAttribute("bndF")
+        self.hasAttribute("bndStrain")
+        self.hasAttribute("bndStress")
+        self.hasAttribute("bndSlip")
+        self.hasAttribute("bndBond")
+        self.hasAttribute("cncM1")
+        self.hasAttribute("cncM2")
+        self.hasAttribute("cncF")
+        self.hasAttribute("cncStrain")
+        self.hasAttribute("cncStress")
+        self.hasAttribute("cncGamma")
+        self.hasAttribute("cncTau")
 
     def findIndice(self, att, ID):
         indice = "error"
@@ -203,12 +309,20 @@ class adaptic:
             att = "elementName"
         if att == "jelF" or att == "jelV" or att == "jelM":
             att = "jelName"
-        if att == "lnk2M1" or att == "lnk2M2" or att == "lnk2F_create":
-            att = "lnk2Name"
-        if att == "gauss1StrainB" or att == "gauss1StrainT" or att == "gauss1StressB" or att == "gauss1StressT" or "gauss2StrainB" or att == "gauss2StrainT" or att == "gauss2StressB" or att == "gauss2StressT":
+        if att == "lnkM1" or att == "lnkM2" or att == "lnkF_create":
+            att = "lnkName"
+        if att == "gauss1StrainAv" or att == "gauss2StrainAv" or "gauss1StrainB" or att == "gauss1StrainT" or att == "gauss1StressB" or att == "gauss1StressT" or "gauss2StrainB" or att == "gauss2StrainT" or att == "gauss2StressB" or att == "gauss2StressT":
             att = "gaussName"
         if att == "nodeDispX" or att == "nodeDispY" or att == "nodeDispRZ":
             att = "nodeName"
+        if att == "bndM1" or att == "bndM2" or att == "bndF":
+            att = "bndName"
+        if att == "bndStrain" or att == "bndStress" or att == "bndSlip" or att == "bndBond":
+            att = "bndGaussName"
+        if att == "cncM1" or att == "cncM2" or att == "cncF":
+            att = "cncName"
+        if att == "cncStrain" or att == "cncStress" or att == "cncGamma" or att == "cncTau":
+            att = "cncGaussName"
         #print('att = {0}'.format(att))
         for i, j in enumerate(getattr(self, att)):
             if j == ID:

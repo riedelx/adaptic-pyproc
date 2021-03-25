@@ -116,6 +116,7 @@ def ASTR_plot(lst, ult_p, ult_n, title, x_label, y_label, scaleX = 1, scaleY = 1
     for i in [positive, negative]:
         x1 = i[1]
         k1 = i[0]
+        print(k1, x1)
         y1 = k1 * x1
         x2 = i[3]
         k2 = i[2]
@@ -151,7 +152,8 @@ def ASTR_plot(lst, ult_p, ult_n, title, x_label, y_label, scaleX = 1, scaleY = 1
     plt.title(title)
     plt.show()
 
-def astr_gap(gapP,gapN,plotting=True,xlim=[20,-20],title='astr gap curve',xlabel='displacement [mm]',ylabel='force [kN]', scaleX = 1, scaleY = 1):
+def astr_gap(gapP,gapN,S1=2.00E+09,S2=1.00E+09,plotting=True,xlim=[20,-20],title='astr gap curve',xlabel='displacement [mm]',ylabel='force [kN]', scaleX = 1, scaleY = 1):
+    # S1, S2 are the stiffnesses after closing the gap
     k,gap=[],[]
     for i in [gapP,gapN]:
         if i=='rigid':
@@ -160,7 +162,7 @@ def astr_gap(gapP,gapN,plotting=True,xlim=[20,-20],title='astr gap curve',xlabel
         else:
             k.append(0)
             gap.append(np.abs(i))
-    curve=['astr']+[2.00E+09, 0.00E+00, k[0], gap[0], 1.00E+09]+[2.00E+09, 0.00E+00, k[1], -gap[1], 1.00E+09]
+    curve=['astr']+[S1, 0.00E+00, k[0], gap[0], S2]+[S1, 0.00E+00, k[1], -gap[1], S2]
     if plotting:
              ASTR_plot(curve, xlim[0], xlim[1], title,xlabel, ylabel, scaleX = scaleX, scaleY = scaleY)
     return curve
@@ -169,8 +171,143 @@ def setattrs(_self, **kwargs):
     for k,v in kwargs.items():
         setattr(_self, k, v)
 
+def centroidX(points,discr=100):
+    #points=[[x1,y1],[x2,y2]]
+    x = [p[0] for p in points]
+    y = [p[1] for p in points]
+    points=np.array([x,y])
+    area=np.trapz([y[0],y[-1]], x=[x[0],x[-1]])
+    L=x[-1]-x[0]
+    L_incr=L/discr
+    moment=0
+    for i in range(discr):
+        if i == discr-1:
+            x2=x[-1]
+        else:
+            x2=(i+1)*L_incr
+        y2=findExactPoint(points, x2,limY=False)[1]
+        x1=(i)*L_incr
+        y1=findExactPoint(points, x1,limY=False)[1]
+        area_temp=np.trapz([y1,y2], x=[x1,x2])
+        moment+=area_temp*(x2-L_incr/2)
+    return moment/area
+
+# #=====================================================#
+# # from PyFEA
+# def matchSign(a,b):
+#     if b >= 0:
+#         return a
+#     else:
+#         return -a
+#
+# def round_sig(x, sig=2):
+#     if x ==0: return 0
+#     else: return round(x, sig-int(floor(log10(abs(x))))-1)
+#
+# def findExactPoint(curve1, coordinate,limY=True, multiple=False): # also in postproc
+#     if limY:
+#         curve2=np.array([[-9E99,np.inf],[coordinate,coordinate]])
+#     else:
+#         curve2=np.array([[coordinate,coordinate],[-9E99,np.inf]])
+#     tupl = (intersection(curve1[0], curve1[1], curve2[0], curve2[1]))
+#     try:
+#         return [float(tupl[0]),float(tupl[1])]
+#     except:
+#         if multiple:
+#             return (tupl[0]),(tupl[1])
+#         else:
+#             return [float(tupl[0][0]),float(tupl[1][0])]
+#
+# # Intersection of two curves
+# """
+# Sukhbinder
+# 5 April 2017
+# Based on:
+# """
+# def _rect_inter_inner(x1,x2):
+#     n1=x1.shape[0]-1
+#     n2=x2.shape[0]-1
+#     X1=np.c_[x1[:-1],x1[1:]]
+#     X2=np.c_[x2[:-1],x2[1:]]
+#     S1=np.tile(X1.min(axis=1),(n2,1)).T
+#     S2=np.tile(X2.max(axis=1),(n1,1))
+#     S3=np.tile(X1.max(axis=1),(n2,1)).T
+#     S4=np.tile(X2.min(axis=1),(n1,1))
+#     return S1,S2,S3,S4
+#
+# def _rectangle_intersection_(x1,y1,x2,y2):
+#     S1,S2,S3,S4=_rect_inter_inner(x1,x2)
+#     S5,S6,S7,S8=_rect_inter_inner(y1,y2)
+#
+#     C1=np.less_equal(S1,S2)
+#     C2=np.greater_equal(S3,S4)
+#     C3=np.less_equal(S5,S6)
+#     C4=np.greater_equal(S7,S8)
+#
+#     ii,jj=np.nonzero(C1 & C2 & C3 & C4)
+#     return ii,jj
+#
+# def intersection(x1,y1,x2,y2): # also in postproc
+#     """
+# INTERSECTIONS Intersections of curves.
+#    Computes the (x,y) locations where two curves intersect.  The curves
+#    can be broken with NaNs or have vertical segments.
+# usage:
+# x,y=intersection(x1,y1,x2,y2)
+#     Example:
+#     a, b = 1, 2
+#     phi = np.linspace(3, 10, 100)
+#     x1 = a*phi - b*np.sin(phi)
+#     y1 = a - b*np.cos(phi)
+#     x2=phi
+#     y2=np.sin(phi)+2
+#     x,y=intersection(x1,y1,x2,y2)
+#     plt.plot(x1,y1,c='r')
+#     plt.plot(x2,y2,c='g')
+#     plt.plot(x,y,'*k')
+#     plt.show()
+#     """
+#     ii,jj=_rectangle_intersection_(x1,y1,x2,y2)
+#     n=len(ii)
+#
+#     dxy1=np.diff(np.c_[x1,y1],axis=0)
+#     dxy2=np.diff(np.c_[x2,y2],axis=0)
+#
+#     T=np.zeros((4,n))
+#     AA=np.zeros((4,4,n))
+#     AA[0:2,2,:]=-1
+#     AA[2:4,3,:]=-1
+#     AA[0::2,0,:]=dxy1[ii,:].T
+#     AA[1::2,1,:]=dxy2[jj,:].T
+#
+#     BB=np.zeros((4,n))
+#     BB[0,:]=-x1[ii].ravel()
+#     BB[1,:]=-x2[jj].ravel()
+#     BB[2,:]=-y1[ii].ravel()
+#     BB[3,:]=-y2[jj].ravel()
+#
+#     for i in range(n):
+#         try:
+#             T[:,i]=np.linalg.solve(AA[:,:,i],BB[:,i])
+#         except:
+#             T[:,i]=np.NaN
+#
+#     in_range= (T[0,:] >=0) & (T[1,:] >=0) & (T[0,:] <=1) & (T[1,:] <=1)
+#
+#     xy0=T[2:,in_range]
+#     xy0=xy0.T
+#     return xy0[:,0],xy0[:,1]
+#
+# def maxAbs(a,b):
+#     if np.abs(a) >= np.abs(b):
+#         return a
+#     else:
+#         return b
+# # from PyFEA
+# #=====================================================#
+
 class param2adap:
-    def __init__(self, name, params):
+    def __init__(self, name, params,ID=''):
         self.name = name
         self.params = params
         crv_type = []
@@ -183,7 +320,9 @@ class param2adap:
                 crv_param.append([x for i,x in enumerate(i) if i!=0])
         self.crv_type = crv_type
         self.crv_param = [val for sublist in crv_param for val in sublist]
-        self.printout = str_joint([name] + self.crv_type + self.crv_param)
+        if ID=='': ID=''
+        else: ID=' # '+ID
+        self.printout = str_joint([name] + self.crv_type + self.crv_param)+ID
 
 # Maths and geometry
 import math
