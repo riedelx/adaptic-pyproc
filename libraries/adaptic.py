@@ -80,8 +80,8 @@ class adaptic:
     def restrainedName_create(self):
         self.restrainedName = self.convertNum(self.wordsNum,"#in1",3,0,"str")
 
-    def elementName_create(self):
-        self.elementName = self.convertNum(self.wordsNum,"#ie1",3,0,"str")
+    def cbpName_create(self):
+        self.cbpName = self.convertNum(self.wordsNum,"#ie1",3,0,"str")
 
     def jelName_create(self):
         self.jelName = self.convertNum(self.wordsNum,"#ie11",3,0,"str")
@@ -101,9 +101,13 @@ class adaptic:
         self.hasAttribute("nodeName")
         self.nodeDispRZ = self.convertNum(self.wordsNum,"#in2",3,3,"float")
 
-    def elementM1_create(self):
-        self.hasAttribute("elementName")
-        self.elementM1 = self.convertNum(self.wordsNum,"#ie1",3,1,"float")
+    def cbpM1_create(self):
+        self.hasAttribute("cbpName")
+        self.cbpM1 = self.convertNum(self.wordsNum,"#ie1",3,1,"float")
+
+    def cbpTheta1_create(self):
+        self.hasAttribute("cbpName")
+        self.cbpTheta1 = self.convertNum(self.wordsNum,"#ie1d1",3,1,"float")
 
     def restrainedX_create(self):
         self.hasAttribute("restrainedName")
@@ -117,13 +121,21 @@ class adaptic:
         self.hasAttribute("restrainedName")
         self.restrainedRZ = self.convertNum(self.wordsNum,"#in1",3,3,"float")
 
-    def elementM2_create(self):
-        self.hasAttribute("elementName")
-        self.elementM2 = self.convertNum(self.wordsNum,"#ie1",3,2,"float")
+    def cbpM2_create(self):
+        self.hasAttribute("cbpName")
+        self.cbpM2 = self.convertNum(self.wordsNum,"#ie1",3,2,"float")
 
-    def elementF_create(self):
-        self.hasAttribute("elementName")
-        self.elementF = self.convertNum(self.wordsNum,"#ie1",3,3,"float")
+    def cbpTheta2_create(self):
+        self.hasAttribute("cbpName")
+        self.cbpTheta2 = self.convertNum(self.wordsNum,"#ie1d1",3,2,"float")
+
+    def cbpF_create(self):
+        self.hasAttribute("cbpName")
+        self.cbpF = self.convertNum(self.wordsNum,"#ie1",3,3,"float")
+
+    def cbpDelta_create(self):
+        self.hasAttribute("cbpName")
+        self.cbpDelta = self.convertNum(self.wordsNum,"#ie1d1",3,3,"float")
 
     def jelF_create(self):
         self.hasAttribute("jelName")
@@ -168,6 +180,18 @@ class adaptic:
         self.hasAttribute("gauss2StrainB")
         self.hasAttribute("gaussName")
         self.gauss2StrainAv = (self.gauss2StrainT+self.gauss2StrainB)/2
+
+    def gauss1StressAv_create(self):
+        self.hasAttribute("gauss1StressT")
+        self.hasAttribute("gauss1StressB")
+        self.hasAttribute("gaussName")
+        self.gauss1StressAv = (self.gauss1StressT+self.gauss1StressB)/2
+
+    def gauss2StressAv_create(self):
+        self.hasAttribute("gauss2StressT")
+        self.hasAttribute("gauss2StressB")
+        self.hasAttribute("gaussName")
+        self.gauss2StressAv = (self.gauss2StressT+self.gauss2StressB)/2
 
     def gauss1StressB_create(self):
         self.hasAttribute("gaussName")
@@ -271,9 +295,12 @@ class adaptic:
         self.hasAttribute("nodeDispX")
         self.hasAttribute("nodeDispY")
         self.hasAttribute("nodeDispRZ")
-        self.hasAttribute("elementM1")
-        self.hasAttribute("elementM2")
-        self.hasAttribute("elementF")
+        self.hasAttribute("cbpM1")
+        self.hasAttribute("cbpM2")
+        self.hasAttribute("cbpTheta1")
+        self.hasAttribute("cbpTheta2")
+        self.hasAttribute("cbpF")
+        self.hasAttribute("cbpDelta")
         self.hasAttribute("jelF")
         self.hasAttribute("jelV")
         self.hasAttribute("jelM")
@@ -285,7 +312,9 @@ class adaptic:
         self.hasAttribute("gauss2StressB")
         self.hasAttribute("gauss2StressT")
         self.hasAttribute("gauss1StrainAv")
-        self.hasAttribute("gauss1StrainAv")
+        self.hasAttribute("gauss2StrainAv")
+        self.hasAttribute("gauss1StressAv")
+        self.hasAttribute("gauss2StressAv")
         self.hasAttribute("bndM1")
         self.hasAttribute("bndM2")
         self.hasAttribute("bndF")
@@ -305,13 +334,13 @@ class adaptic:
         indice = "error"
         if att == "restrainedX" or att == "restrainedY" or att == "restrainedRZ":
             att = "restrainedName"
-        if att == "elementM1" or att == "elementM2" or att == "elementF":
-            att = "elementName"
+        if att == "cbpM1" or att == "cbpM2" or att == "cbpF" or att == "cbpTheta1" or att == "cbpTheta2" or att == "cbpDelta":
+            att = "cbpName"
         if att == "jelF" or att == "jelV" or att == "jelM":
             att = "jelName"
         if att == "lnkM1" or att == "lnkM2" or att == "lnkF_create":
             att = "lnkName"
-        if att == "gauss1StrainAv" or att == "gauss2StrainAv" or "gauss1StrainB" or att == "gauss1StrainT" or att == "gauss1StressB" or att == "gauss1StressT" or "gauss2StrainB" or att == "gauss2StrainT" or att == "gauss2StressB" or att == "gauss2StressT":
+        if att == "gauss1StrainAv" or att == "gauss2StrainAv" or "gauss1StressAv" or att == "gauss2StressAv" or "gauss1StrainB" or att == "gauss1StrainT" or att == "gauss1StressB" or att == "gauss1StressT" or "gauss2StrainB" or att == "gauss2StrainT" or att == "gauss2StressB" or att == "gauss2StressT":
             att = "gaussName"
         if att == "nodeDispX" or att == "nodeDispY" or att == "nodeDispRZ":
             att = "nodeName"
@@ -338,13 +367,13 @@ class adaptic:
 
     # alternative constructor
     @classmethod
-    def readFile(cls, title, cutoff = None,folderPath=""):
+    def readFile(cls, title, cutoff = None,folderPath="",numPath=str('/num/')):
         wordsNum=[]
         if folderPath != "":
             path=folderPath
         else:
             path='data/'
-        for data in open(path+str('/num/')+title+str(".num"),'r'):
+        for data in open(path+numPath+title+str(".num"),'r'):
             wordsNum.append(data.split())
         if cutoff:
             for i in range(len(wordsNum)):
