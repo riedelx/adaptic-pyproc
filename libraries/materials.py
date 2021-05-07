@@ -3,8 +3,82 @@ import pandas as pd
 import utils
 import matplotlib.pyplot as plt
 
+# class con1:
+#     def __init__(self, ID, fc1, length, fc2_factor = 0.05,epsilon_2t='',characteristic = True, ft_factor=1, Ec2 = '',Et2 = '',strain_prec=5,rev17=True,GfFactor=1,Qs=0.005,fy=500,tensionStiff=False):
+#         self.resid_str = fc2_factor
+#         self.ID = ID
+#         self.fc1 = fc1
+#         self.fc2 = self.resid_str * fc1
+#         self.Qs=Qs # Qst - ratio of volume of transverse reinforcement to volume of concrete core
+#         self.fy=fy # fy = yield strength of steel
+#         self.length = length
+#         self.density = 2400 / 10**9 # 2400 kg/m3
+#         self.rev17=rev17
+#         if characteristic:
+#             self.fcm = fc1+8
+#         else:
+#             self.fcm = fc1
+#         if fc1 <= 50:
+#             self.ft = ft_factor*0.3 * self.fcm ** (2/3)
+#         else:
+#             self.ft = ft_factor*2.12*np.log(1+0.1*self.fcm)
+#         if tensionStiff: self.ft = self.ft / 2
+#         self.Gf = 73 * self.fcm**0.18/1000*GfFactor
+#         self.Ec0 = int(21500*(self.fcm/10)**(1/3))
+#         self.poisson = 0.2
+#         self.Gc = 250 * self.Gf
+#         self.epsilon_1c = 5 * fc1 / self.Ec0 /3
+#         self.Ec1 = fc1 / self.epsilon_1c
+#         self.alphaC = min(max(0,(self.Ec0 - self.Ec1)/self.Ec1),1)
+#         if Ec2 != '':
+#             self.Ec2 = Ec2
+#             self.epsilon_2c = (self.fc1-self.fc2)/-Ec2+self.epsilon_1c
+#         else:
+#             # epsilon_2c - compressive fracture energy method
+#             # self.Gc = round(250 * self.Gf, 1)
+#             # # self.epsilon_2c = round((self.fc1-self.fc2)/-Ec2+self.epsilon_1c, strain_prec)
+#             # self.epsilon_2c = round(self.epsilon_1c + 3 * self.Gc / (2 * length * fc1), strain_prec)
+#
+#             # epsilon_2c - Scott et al. (1982)
+#             self.epsilon_2c = 0.004 + 0.9*self.Qs*self.fy/300
+#             self.Ec2 = -(self.fc1-self.fc2)/(self.epsilon_2c - self.epsilon_1c) # secant compressive softening stiffness
+#         self.Et1 = self.Ec0
+#         self.epsilon_1t = self.ft / self.Et1
+#         if epsilon_2t!='': self.epsilon_2t = epsilon_2t
+#         elif tensionStiff:
+#             self.epsilon_2t = 0.001
+#         else:
+#             alphat = -1
+#             # epsilon_2t
+#             area_f = self.Gf/self.length # fracture energy area
+#             area_f_soft = area_f - self.epsilon_1t*self.ft/2 # area under the softening curve
+#             # Method 1 -# Figure 1 page p 17 in RTD 2010
+#             # eps_u = 2*area_f_soft/self.ft
+#             # E0 = -self.ft/(eps_u-self.epsilon_1t) # tangent stiffness at epsilon_1t
+#             # E1 = 0 # tangent stiffness at epsilon_2t
+#             # self.epsilon_2t = max((self.epsilon_1t*E0+self.epsilon_1t*E1-2*self.ft)/(E0+E1),self.epsilon_1t)
+#             # Method 2
+#             # epsilon_2t using area under parabola curve
+#             if area_f_soft > 0: self.epsilon_2t = (self.epsilon_1t*self.ft*alphat+3*self.epsilon_1t*self.ft+6*area_f_soft)/(self.ft*(alphat+3))
+#             # self.epsilon_2t = max(self.epsilon_1t+3*area_f_soft/self.ft,self.epsilon_1t)
+#             else: self.epsilon_2t = self.epsilon_1t
+#         self.epsilon_2t = self.epsilon_2t
+#         if Et2 != '':
+#             self.Et2 = Et2
+#             self.epsilon_2t = (self.ft)/-Et2+self.epsilon_1t
+#         else:
+#             self.Et2 = - self.ft /(self.epsilon_2t - self.epsilon_1t)
+#
+#     def adaptic_print(self,rawNr=False):
+#         if rawNr: return self.ID,'con1', self.Ec1, self.fc1, self.Ec2, self.fc2, self.Et1,self.ft, self.Et2
+#         elif self.rev17: line = utils.str_joint([self.ID,'con1', self.Ec1, self.fc1, self.Ec2, self.fc2, self.Et1,
+#                                       self.ft, self.Et2, -self.alphaC, -1])
+#         else: line = utils.str_joint([self.ID,'con1', self.Ec1, self.fc1, self.Ec2, self.fc2, self.Et1,
+#                                       self.ft, self.Et2, self.alphaC])
+#         return line
+
 class con1:
-    def __init__(self, ID, fc1, length, fc2_factor = 0.05,epsilon_2t='',characteristic = True, ft_factor=1, Ec2 = '',Et2 = '',strain_prec=5,rev17=True,GfFactor=1,Qs=0.005,fy=500,tensionStiff=False):
+    def __init__(self, ID, fc1, length, fc2_factor = 0.05,epsilon_2t='',characteristic = True, ft_factor=1,Ec2_factor='', Ec2 = '',Et2 = '',strain_prec=5,rev17=True,GfFactor=1,Qs=0.005,fy=500,tensionStiff=False):
         self.resid_str = fc2_factor
         self.ID = ID
         self.fc1 = fc1
@@ -13,7 +87,6 @@ class con1:
         self.fy=fy # fy = yield strength of steel
         self.length = length
         self.density = 2400 / 10**9 # 2400 kg/m3
-        self.rev17=rev17
         if characteristic:
             self.fcm = fc1+8
         else:
@@ -29,10 +102,10 @@ class con1:
         self.Gc = 250 * self.Gf
         self.epsilon_1c = 5 * fc1 / self.Ec0 /3
         self.Ec1 = fc1 / self.epsilon_1c
-        self.alphaC = min(max(0,(self.Ec0 - self.Ec1)/self.Ec1),1)
+        self.alphaC = -min(max(0,(self.Ec0 - self.Ec1)/self.Ec1),1)
         if Ec2 != '':
             self.Ec2 = Ec2
-            self.epsilon_2c = (self.fc1-self.fc2)/-Ec2+self.epsilon_1c
+            self.epsilon_2c = (self.fc1-self.fc2)/-Ec2+self.epsilon_1c # was (self.fc1-self.fc2)/-Ec2+self.epsilon_1c
         else:
             # epsilon_2c - compressive fracture energy method
             # self.Gc = round(250 * self.Gf, 1)
@@ -42,13 +115,16 @@ class con1:
             # epsilon_2c - Scott et al. (1982)
             self.epsilon_2c = 0.004 + 0.9*self.Qs*self.fy/300
             self.Ec2 = -(self.fc1-self.fc2)/(self.epsilon_2c - self.epsilon_1c) # secant compressive softening stiffness
+        if Ec2_factor != '' and Ec2=='':
+            self.Ec2 = self.Ec2*Ec2_factor
+            self.epsilon_2c = (self.fc1-self.fc2)/self.Ec2+self.epsilon_1c
         self.Et1 = self.Ec0
         self.epsilon_1t = self.ft / self.Et1
+        self.alphaT = -1
         if epsilon_2t!='': self.epsilon_2t = epsilon_2t
         elif tensionStiff:
             self.epsilon_2t = 0.001
         else:
-            alphat = -1
             # epsilon_2t
             area_f = self.Gf/self.length # fracture energy area
             area_f_soft = area_f - self.epsilon_1t*self.ft/2 # area under the softening curve
@@ -59,9 +135,11 @@ class con1:
             # self.epsilon_2t = max((self.epsilon_1t*E0+self.epsilon_1t*E1-2*self.ft)/(E0+E1),self.epsilon_1t)
             # Method 2
             # epsilon_2t using area under parabola curve
-            if area_f_soft > 0: self.epsilon_2t = (self.epsilon_1t*self.ft*alphat+3*self.epsilon_1t*self.ft+6*area_f_soft)/(self.ft*(alphat+3))
+            if area_f_soft > 0: self.epsilon_2t = (self.epsilon_1t*self.ft*self.alphaT+3*self.epsilon_1t*self.ft+6*area_f_soft)/(self.ft*(self.alphaT+3))
             # self.epsilon_2t = max(self.epsilon_1t+3*area_f_soft/self.ft,self.epsilon_1t)
-            else: self.epsilon_2t = self.epsilon_1t
+            else: # area_f smaller than ft
+                self.epsilon_1t = 2 * area_f / self.Et1
+                self.epsilon_2t = 1.1*self.epsilon_1t
         self.epsilon_2t = self.epsilon_2t
         if Et2 != '':
             self.Et2 = Et2
@@ -69,14 +147,10 @@ class con1:
         else:
             self.Et2 = - self.ft /(self.epsilon_2t - self.epsilon_1t)
 
-    def adaptic_print(self,rawNr=False):
-        if rawNr: return self.ID,'con1', self.Ec1, self.fc1, self.Ec2, self.fc2, self.Et1,self.ft, self.Et2
-        elif self.rev17: line = utils.str_joint([self.ID,'con1', self.Ec1, self.fc1, self.Ec2, self.fc2, self.Et1,
-                                      self.ft, self.Et2, -self.alphaC, -1])
-        else: line = utils.str_joint([self.ID,'con1', self.Ec1, self.fc1, self.Ec2, self.fc2, self.Et1,
-                                      self.ft, self.Et2, self.alphaC])
-        return line
+        self.adaptic = [self.Ec1,self.fc1,self.Ec2,self.fc2,self.Et1,self.ft,self.Et2,self.alphaC,self.alphaT]
 
+    def adaptic_print(self,rawNr=False):
+        return utils.str_joint([self.ID,'con1', self.Ec1, self.fc1, self.Ec2, self.fc2, self.Et1, self.ft, self.Et2, self.alphaC, self.alphaT])
 
     def data_frame(self):
         data = np.array([[self.ID, self.length, self.fc1, self.fc2, self.ft, self.Ec0, self.Ec1,
@@ -127,6 +201,13 @@ class stl1:
     def stress_df(self):
         df = pd.DataFrame([[0,0],[self.epsilon_y,self.fy],[self.epsilon_u,self.fu]],columns=['strain','stress'])
         return df
+
+    def stress(self,strain):
+        if 0<=strain<=self.epsilon_y: return strain*self.E1
+        elif self.epsilon_y<strain<=self.epsilon_u: return self.fy+(strain-self.epsilon_y)*self.E2
+        elif 0>=strain>=-self.epsilon_y: return strain*self.E1
+        elif -self.epsilon_y>strain>=-self.epsilon_u: return -self.fy+(strain-self.epsilon_y)*self.E2
+        else: return 0
 
 class bond:
     def __init__(self,ID,c,f_cm,ft,L,dia,n_bars,case=0,redFact=1):
@@ -195,18 +276,18 @@ class bond:
         return force/(self.n_bars*self.dia*np.pi*self.L)
     def tau2force(self,tau):
         return tau*(self.n_bars*self.dia*np.pi*self.L)
-    def curve(self,stop=9,num=50,title='bond stress–slip relationship',astrPlot=True):
+    def curve(self,stop=9,num=50,title='bond stress–slip relationship',astrPlot=True,label1='MC2010',label2='ASTR'):
         fig = plt.figure(figsize = (6,4))
         ax = fig.add_subplot(111)
         ax.grid(which='major', linestyle=':', linewidth='0.5', color='black')
         x=np.linspace(0, stop, num)
         y=[self.slip2tau(i) for i in x]
-        ax.plot(x,y,'-', linewidth=2, markersize=5,label='bond')
+        ax.plot(x,y,'-', linewidth=2, markersize=5,label=label1)
         if astrPlot:
             disp1 = self.s_1
             disp2 = self.s_3
             disp3 = stop
-            ax.plot([0,disp1,disp2,disp3],[0,self.slip2tau(disp1),self.slip2tau(disp2),self.slip2tau(disp3)],'-', linewidth=2, markersize=5,label='astr')
+            ax.plot([0,disp1,disp2,disp3],[0,self.slip2tau(disp1),self.slip2tau(disp2),self.slip2tau(disp3)],'-', linewidth=2, markersize=5,label=label2)
             ax.legend()
         ax.set_title(title)
         ax.set_xlabel('Slip [mm]')
@@ -225,16 +306,16 @@ class bond:
         return f1,f2,f3,disp1,disp2,disp3
     def dataframe(self):
         return pd.DataFrame([[self.s_1,self.s_2,self.s_3,self.slip2tau(self.s_1),self.slip2tau(self.s_2),self.slip2tau(self.s_3)]],columns=['s_1','s_2','s_3','t_1','t_2','t_3'])
-    def curve_force(self,stop=9,num=50,title='bond force–slip relationship'):
+    def curve_force(self,stop=9,num=50,title='bond force–slip relationship',label1='MC2010',label2='ASTR'):
         fig = plt.figure(figsize = (6,4))
         ax = fig.add_subplot(111)
         ax.grid(which='major', linestyle=':', linewidth='0.5', color='black')
         x=np.linspace(0, stop, num)
         y=[(self.tau2force(self.slip2tau(i)))/1000 for i in x]
         if self.case ==0: ax.plot(x,y,'-', linewidth=2, markersize=5,label='ft')
-        else: ax.plot(x,y,'-', linewidth=2, markersize=5,label='MC2010')
+        else: ax.plot(x,y,'-', linewidth=2, markersize=5,label=label1)
         f1,f2,f3,disp1,disp2,disp3=self.astr_curve()
-        ax.plot([0,disp1,disp2,disp3],[0,f1/1000,f2/1000,f3/1000],'-', linewidth=2, markersize=5,label='ASTR')
+        ax.plot([0,disp1,disp2,disp3],[0,f1/1000,f2/1000,f3/1000],'-', linewidth=2, markersize=5,label=label2)
         ax.legend()
         ax.set_title(title)
         ax.set_xlabel('Slip [mm]')
@@ -266,7 +347,7 @@ class bond:
 
 class stmdl2:
     # this is con1 ADAPTIC model
-    def __init__(self,ec0,muec1,strnc1,stresc1,et0,muet1,strnt1,alphac,alphat,pseto=0,crkso=0,strain_prec=5):#pseto,crkso,
+    def __init__(self,ec0,muec1,strnc1,stresc1,et0,muet1,strnt1,alphac,alphat,pseto=0,crkso=0,strain_prec=5, ID='stmdl2'):#pseto,crkso,
         # This subroutine calculates the stress at a monitoring point for
         # material MODEL(2).
 
@@ -286,6 +367,7 @@ class stmdl2:
         self.alphac=alphac
         self.alphat=alphat
 
+        self.ID = ID
         # Derived, not used in stress
         self.ec0t=round((1+np.abs(alphac))*ec0) # secant compressive stiffness
         self.strnc0=round((stresc1-muec1*strnc1)/(ec0-muec1),strain_prec) # strain at peak compressive strength
@@ -295,7 +377,7 @@ class stmdl2:
         else: self.et0t=et0
         self.ft=round(self.et0*self.strnt0,1) # peak tensile strength
 
-        data = np.array([['stmdl2',self.stresc0, self.stresc1, self.ft, self.ec0t, self.ec0,
+        data = np.array([[self.ID,self.stresc0, self.stresc1, self.ft, self.ec0t, self.ec0,
                           self.muec1, self.et0, self.muet1, self.strnc0,
                           self.strnc1, self.strnt0, self.strnt1, self.alphac, self.alphat]])
         self.prop = pd.DataFrame(data,index=data[:,0])
@@ -303,10 +385,10 @@ class stmdl2:
             '$$E_{t1}[MPa]$$','$$E_{t2}[MPa]$$','$$e_{c1}$$','$$e_{c2}$$','$$e_{t1}$$', '$$e_{t2}$$', '$$alpha_{c}$$', '$$alpha_{t}$$']
 
     @classmethod # alternative constructor
-    def from_ADAPTIC(cls, ec1,fc1,ec2,fc2,et1,ft,et2,alphac,alphat):
+    def from_ADAPTIC(cls, ec1,fc1,ec2,fc2,et1,ft,et2,alphac,alphat, ID='stmdl2'):
         strnc1=-fc1/ec1+(fc1-fc2)/ec2
         strnt1=ft/et1-ft/et2
-        return cls(ec0=ec1,muec1=ec2,strnc1=strnc1,stresc1=-fc2,et0=et1,muet1=et2,strnt1=strnt1,alphac=alphac,alphat=alphat)
+        return cls(ec0=ec1,muec1=ec2,strnc1=strnc1,stresc1=-fc2,et0=et1,muet1=et2,strnt1=strnt1,alphac=alphac,alphat=alphat, ID = ID)
 
     def y_E1(self,x,E1,E0,x0,x1,y0,printing=True):
         a=(E0-E1)/2/(x0-x1)
