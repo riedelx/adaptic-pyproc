@@ -31,8 +31,8 @@ This folder contains images and miscellaneous data used to obtain certain proper
 These are all the python libraries _.py_ that provide the necessary classes and functions to run the analyses. These were designed for pre-processing and post-processing data in _ADAPTIC_. 
 
 1. _utils.py_ - contains miscellaneous functions and classes used through the entire project.
-2. _materials.py_ - material classes. Currently the following material models are available: stl1, con1.
-3. _sections.py_ - section classes. Currently the following section models are available: rss, rccs and rcts.
+2. _materials.py_ - material classes. Currently the following material models are available: stl1, con1, con2, stmdl2 and bond.
+3. _sections.py_ - section classes. Currently the following section models are available: rss, rccs, rcts and isec.
 6. _adaptic.py_ - this defines the *adaptic* class for post-processing.
 
 ### 3. Documentation
@@ -48,7 +48,6 @@ Sample models were created to show how *ADAPTIC PyProc* could be incorporated in
 
 2. _preprocessor.ipynb_ - this notebook generates the _.dat_ and _pkl_ files. It reads the libraries defined in _modules_ folder and modifies certain properties if necessary. It does not provide the overview of the model, which is covered in _analysis.ipynb_ instead.
 2. _analysis.ipynb_ - this notebook describes the model, unpickles the objects from pre-processing stage and reads the *ADAPTIC* output from the _num_ file. Next, post-processing of the data is carried out with an interpretation of the results.
-3. images - folder to keep the images of the system.
 4. _.pkl_ file - pickled model structure hierarchy by converting into a byte stream. The objects instantiated during the pre-processing can be unpickled during post-processing.
 5. _.dat_ file - input file for *ADAPTIC* analysis.
 6. _.num_ file - output file from *ADAPTIC* that contains the numerical results at all requested load/time steps.
