@@ -44,11 +44,10 @@ The documentation of the libraries is covered in the corresponding _.ipynb_ note
 
 ### 4. Models
 
-Sample models were created to show how *ADAPTIC PyProc* could be incorporated into a project. The definition of a model is done in _preprocessor.ipynb_. When running this notebook a _.dat_ file is created and used as an input for _ADAPTIC_ (see [software documentation](https://spiral.imperial.ac.uk/handle/10044/1/4228)). The output files have to be then placed in the model folder to run _analysis.ipynb_ notebook for post-processing. Each model contains the following folders and files:
+Sample models were created to show how *ADAPTIC PyProc* could be incorporated into a project. The definition of a model is done in _preprocessor.ipynb_. When running this notebook a _.dat_ file is created and used as an input for _ADAPTIC_ (see [software documentation](https://spiral.imperial.ac.uk/handle/10044/1/4228)). The output files have to be then placed in the model folder to run postprocessor.ipynb_ notebook for post-processing. Each model contains the following folders and files:
 
 2. _preprocessor.ipynb_ - this notebook generates the _.dat_ and _pkl_ files. It reads the libraries defined in _modules_ folder and modifies certain properties if necessary. It does not provide the overview of the model, which is covered in _analysis.ipynb_ instead.
-2. _analysis.ipynb_ - this notebook describes the model, unpickles the objects from pre-processing stage and reads the *ADAPTIC* output from the _num_ file. Next, post-processing of the data is carried out with an interpretation of the results.
-4. _.pkl_ file - pickled model structure hierarchy by converting into a byte stream. The objects instantiated during the pre-processing can be unpickled during post-processing.
+2. postprocessor.ipynb_ - this notebook describes the model, unpickles the objects from pre-processing stage and reads the *ADAPTIC* output from the _num_ file. Next, post-processing of the data is carried out with an interpretation of the results.
 5. _.dat_ file - input file for *ADAPTIC* analysis.
 6. _.num_ file - output file from *ADAPTIC* that contains the numerical results at all requested load/time steps.
 7. _.log_ file - output file from _ADAPTIC_ that contains solution progress log (not required by *ADAPTIC PyProc*).
