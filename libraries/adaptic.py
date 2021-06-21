@@ -345,6 +345,13 @@ class adaptic3D(adap1):
         self.gaussName = np.array([temp1[i]+"_"+temp2[i] for i in range(len(temp2))])
         del temp1, temp2
 
+    def cvsName_create(self): # element - material - position
+        temp1 = self.convertNum(self.wordsNum,"#ie52s1",3,0,"str")
+        temp2 = self.convertNum(self.wordsNum,"#ie52s1",3,1,"str")
+        temp2 = np.array([i.replace(".", "_") for i in temp2])
+        self.cvsName = np.array([temp1[i]+"_"+temp2[i] for i in range(len(temp2))])
+        del temp1, temp2
+
     def nodeDispZ_create(self):
         self.nodeDispRZ = self.convertNum(self.wordsNum,"#in2",3,3,"float")
 
@@ -405,7 +412,6 @@ class adaptic3D(adap1):
         self.hasAttribute("cbpName")
         self.cbpTheta = self.convertNum(self.wordsNum,"#ie1d1",3,6,"float")
 
-
     def restrainedRZ_create(self):
         self.hasAttribute("restrainedName")
         self.restrainedRZ = self.convertNum(self.wordsNum,"#in1",3,3,"float")
@@ -458,61 +464,85 @@ class adaptic3D(adap1):
         self.hasAttribute("lnkName")
         self.lnkMT = self.convertNum(self.wordsNum,"#ie18",3,6,"float")
 
-    def gauss1StrainB_create(self):
+    def gauss1Strain_create(self):
         self.hasAttribute("gaussName")
-        self.gauss1StrainB = self.convertNum(self.wordsNum,"#ie1s",3,2,"float")
+        self.gauss1Strain = self.convertNum(self.wordsNum,"#ie31s",3,2,"float")
 
-    def gauss1StrainT_create(self):
+    def gauss2Strain_create(self):
         self.hasAttribute("gaussName")
-        self.gauss1StrainT = self.convertNum(self.wordsNum,"#ie1s",3,4,"float")
+        self.gauss2Strain = self.convertNum(self.wordsNum,"#ie31s",3,4,"float")
 
-    def gauss1StrainAv_create(self):
-        self.hasAttribute("gauss1StrainT")
-        self.hasAttribute("gauss1StrainB")
+    def gauss1Stress_create(self):
         self.hasAttribute("gaussName")
-        self.gauss1StrainAv = (self.gauss1StrainT+self.gauss1StrainB)/2
+        self.gauss1Stress = self.convertNum(self.wordsNum,"#ie31s",3,3,"float")
 
-    def gauss2StrainAv_create(self):
-        self.hasAttribute("gauss2StrainT")
-        self.hasAttribute("gauss2StrainB")
+    def gauss2Stress_create(self):
         self.hasAttribute("gaussName")
-        self.gauss2StrainAv = (self.gauss2StrainT+self.gauss2StrainB)/2
+        self.gauss2Stress = self.convertNum(self.wordsNum,"#ie31s",3,5,"float")
 
-    def gauss1StressAv_create(self):
-        self.hasAttribute("gauss1StressT")
-        self.hasAttribute("gauss1StressB")
-        self.hasAttribute("gaussName")
-        self.gauss1StressAv = (self.gauss1StressT+self.gauss1StressB)/2
+    def cvsNx_create(self):
+        self.hasAttribute("cvsName")
+        self.cvsNx = self.convertNum(self.wordsNum,"#ie52s1",3,2,"float")
 
-    def gauss2StressAv_create(self):
-        self.hasAttribute("gauss2StressT")
-        self.hasAttribute("gauss2StressB")
-        self.hasAttribute("gaussName")
-        self.gauss2StressAv = (self.gauss2StressT+self.gauss2StressB)/2
+    def cvsNy_create(self):
+        self.hasAttribute("cvsName")
+        self.cvsNy = self.convertNum(self.wordsNum,"#ie52s1",3,3,"float")
 
-    def gauss1StressB_create(self):
-        self.hasAttribute("gaussName")
-        self.gauss1StressB = self.convertNum(self.wordsNum,"#ie1s",3,3,"float")
+    def cvsNxy_create(self):
+        self.hasAttribute("cvsName")
+        self.cvsNxy = self.convertNum(self.wordsNum,"#ie52s1",3,4,"float")
 
-    def gauss1StressT_create(self):
-        self.hasAttribute("gaussName")
-        self.gauss1StressT = self.convertNum(self.wordsNum,"#ie1s",3,5,"float")
+    def cvsMx_create(self):
+        self.hasAttribute("cvsName")
+        self.cvsMx = self.convertNum(self.wordsNum,"#ie52s1",3,5,"float")
 
-    def gauss2StrainB_create(self):
-        self.hasAttribute("gaussName")
-        self.gauss2StrainB = self.convertNum(self.wordsNum,"#ie1s",3,6,"float")
+    def cvsMy_create(self):
+        self.hasAttribute("cvsName")
+        self.cvsMy = self.convertNum(self.wordsNum,"#ie52s1",3,6,"float")
 
-    def gauss2StrainT_create(self):
-        self.hasAttribute("gaussName")
-        self.gauss2StrainT = self.convertNum(self.wordsNum,"#ie1s",3,8,"float")
+    def cvsMxy_create(self):
+        self.hasAttribute("cvsName")
+        self.cvsMxy = self.convertNum(self.wordsNum,"#ie52s1",3,7,"float")
 
-    def gauss2StressB_create(self):
-        self.hasAttribute("gaussName")
-        self.gauss2StressB = self.convertNum(self.wordsNum,"#ie1s",3,7,"float")
+    def cvsQxz_create(self):
+        self.hasAttribute("cvsName")
+        self.cvsQxz = self.convertNum(self.wordsNum,"#ie52s1",3,8,"float")
 
-    def gauss2StressT_create(self):
-        self.hasAttribute("gaussName")
-        self.gauss2StressT = self.convertNum(self.wordsNum,"#ie1s",3,9,"float")
+    def cvsQyz_create(self):
+        self.hasAttribute("cvsName")
+        self.cvsQyz = self.convertNum(self.wordsNum,"#ie52s1",3,9,"float")
+
+    def cvsEpsx_create(self):
+        self.hasAttribute("cvsName")
+        self.cvsEpsx = self.convertNum(self.wordsNum,"#ie52s2",3,2,"float")
+
+    def cvsEpsy_create(self):
+        self.hasAttribute("cvsName")
+        self.cvsEpsy = self.convertNum(self.wordsNum,"#ie52s2",3,3,"float")
+
+    def cvsEpsxy_create(self):
+        self.hasAttribute("cvsName")
+        self.cvsEpsxy = self.convertNum(self.wordsNum,"#ie52s2",3,4,"float")
+
+    def cvsKapx_create(self):
+        self.hasAttribute("cvsName")
+        self.cvsKapx = self.convertNum(self.wordsNum,"#ie52s2",3,5,"float")
+
+    def cvsKapy_create(self):
+        self.hasAttribute("cvsName")
+        self.cvsKapy = self.convertNum(self.wordsNum,"#ie52s2",3,6,"float")
+
+    def cvsKapxy_create(self):
+        self.hasAttribute("cvsName")
+        self.cvsKapxy = self.convertNum(self.wordsNum,"#ie52s2",3,7,"float")
+
+    def cvsEpsxz_create(self):
+        self.hasAttribute("cvsName")
+        self.cvsEpsxz = self.convertNum(self.wordsNum,"#ie52s2",3,8,"float")
+
+    def cvsEpsyz_create(self):
+        self.hasAttribute("cvsName")
+        self.cvsEpsyz = self.convertNum(self.wordsNum,"#ie52s2",3,9,"float")
 
     def findIndice(self, att, ID):
         indice = "error"

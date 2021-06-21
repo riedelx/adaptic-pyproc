@@ -5,29 +5,22 @@ import matplotlib.pyplot as plt
 import utils
 import math
 
-def plotFunc(self,x_coordinates,y_coordinates,reverse,title='section layout', analysis_2d = True):
+def plotFunc(self,x_coordinates,y_coordinates,reverse,title='section layout'):
     fig = plt.figure(figsize = (6,4))
     ax = fig.add_subplot(111)
     ax.grid(which='major', linestyle=':', linewidth='0.5', color='black')
     if reverse:y_coordinates=[-i for i in y_coordinates]
     ax.plot(x_coordinates, y_coordinates,'k-')
     try:
-        if self.analysis_2d:
-            for i in self.reinf_sect:
-                yTemp=i[2]
-                bTemp=self.width(yTemp)
-                bSpacing=bTemp/(i[0]+1)
-                if reverse:yTemp=-yTemp
-                for j in range(i[0]):
-                    xTemp=-bTemp/2+j*bSpacing+bSpacing
-                    ax.add_patch(plt.Circle((xTemp,yTemp), radius=i[1]/2, color='b', fill=False))
-        else:
-            for i in self.reinf_sect:
-                yTemp = i[1]
-                if reverse: yTemp=-yTemp
-                for xTemp in i[2]:
-                    ax.add_patch(plt.Circle((xTemp,yTemp), radius=i[0]/2, color='b', fill=False))
-                    if xTemp != 0: ax.add_patch(plt.Circle((-xTemp,yTemp), radius=i[0]/2, color='b', fill=False))
+        for i in self.reinf_sect:
+            yTemp=i[2]
+            bTemp=self.width(yTemp)
+            bSpacing=bTemp/(i[0]+1)
+            if reverse:yTemp=-yTemp
+            for j in range(i[0]):
+                xTemp=-bTemp/2+j*bSpacing+bSpacing
+                circ=plt.Circle((xTemp,yTemp), radius=i[1]/2, color='b', fill=False)
+                ax.add_patch(circ)
         ax.add_artist(circ)
     except: pass
     if reverse:ax.plot(0,-self.centr,'r+',markersize=10,linewidth=8)
@@ -44,9 +37,7 @@ class rss:
         self.d = d
         self.area= b * d
         self.centr_top = d/2
-        self.centr_bot = -d/2
-        self.Iy = b*d**3/12
-        self.Ix = b**3*d/12
+        self.centr_bot = d/2
 
     def plotting(self,title='section layout'):
             y_coordinates = [0,d,d,0,0]
@@ -95,7 +86,7 @@ class rccs:
         return utils.str_joint(line)
 
 class rcts:
-    def __init__(self, ID, reinf_mat, unconf_mat, conf_mat, Df, Dw, Bf, Bw, cover, links, reinf_sect, analysis_2d = True):
+    def __init__(self, ID, reinf_mat, unconf_mat, conf_mat, Df, Dw, Bf, Bw, cover, links, reinf):
         self.ID = ID
         self.reinf_mat = reinf_mat
         self.unconf_mat = unconf_mat
@@ -108,39 +99,26 @@ class rcts:
         self.Bw = Bw
         self.bf = Bf - 2 * cover - links
         self.bw = Bw - 2 * cover - links
-
+        # each layer of reinforcement given as: [no of bars, diameter, distance from the bottom fibre]
         # reinforcement given as a list [[layer_1], [layer_2],..., [layer_n]]
-        # for 2D each layer of reinforcement given as: [no of bars, diameter, distance from the bottom fibre]
-        # for 2D each layer of reinforcement given as: [diameter, distance from the bottom fibre, [z1, z2, z3]]
-        # after sorting layers order starting from the furtherst layer from the bottom fibre
-
-        if analysis_2d:
-            reinf_sect.sort(key = lambda x: x[2], reverse = True)
-            self.reinf = [[int(math.pi*i[1]**2/4 * i[0]), i[2]] for i in reinf_sect] # [no of bars, diameter, distance from the bottom fibre]
-        else:
-            reinf_sect.sort(key = lambda x: x[1], reverse = True)
-            self.reinf = []
-            for i in reinf_sect:
-                for j in i[2]:
-                    area = int(math.pi*i[0]**2/4)
-                    if not analysis_2d and j == 0: area = area / 2
-                    self.reinf.append([area, i[1], j])
-        self.reinf_sect = reinf_sect
-        self.analysis_2d = analysis_2d
+        # layers order starting from the furtherst layer from the bottom fibre
+        reinf = pd.DataFrame(reinf).sort_values(by=[2],ascending=False).astype(int).values.tolist()
+        self.reinf = [[int(math.pi*i[1]**2/4 * i[0]), i[2]] for i in reinf]
+        self.reinf_sect = reinf # [no of bars, diameter, distance from the bottom fibre]
         self.cover = cover
         self.links = links # links diameter
         area_w = Dw * Bw
         area_f = Df * Bf
         self.area = area_w + area_f
         self.centr_top = int((Df*area_f/2+area_w*(Df+Dw/2))/self.area)
-        self.centr_bot = -int(Df + Dw- self.centr_top)
+        self.centr_bot = int(Df + Dw- self.centr_top)
 
     def plotting(self,title='section layout',reverse=False):
         self.h=self.Dw+self.Df
         self.centr = self.centr_top #int(self.h-(Df*area_f/2+area_w*(Df+Dw/2))/self.area)
         y_coordinates = [0,self.Dw+0,self.Dw+0,self.h,self.h,self.Dw+0,self.Dw+0,0,0]
         x_coordinates = [self.Bw/2,self.Bw/2,self.Bf/2,self.Bf/2,-self.Bf/2,-self.Bf/2,-self.Bw/2,-self.Bw/2,self.Bw/2]
-        plotFunc(self,x_coordinates,y_coordinates,title=title,reverse=reverse, analysis_2d = self.analysis_2d)
+        plotFunc(self,x_coordinates,y_coordinates,title=title,reverse=reverse)
     def width(self,x):
         if (x >= 0 and x <= self.Dw):
             b=self.Bw
@@ -174,7 +152,7 @@ class isec:
         area_f2 = bf2 * tf2
         self.area = area_w + area_f1 + area_f2
         self.centr_top = int(((bf1*tf1)*tf1/2+(bf2*tf2)*(tf1+dw+tf2/2)+(dw*tw)*(tf1+dw/2))/self.area)
-        self.centr_bot = -int(tf1+tf2+dw-self.centr_top)
+        self.centr_bot = int(tf1+tf2+dw-self.centr_top)
 
     def plotting(self,title='section layout',reverse=False):
         self.h=self.tf1+self.tf2+self.dw

@@ -171,6 +171,18 @@ class con2(con1):
         line = utils.str_joint([self.ID,'con2', self.fc1, self.ft, self.epsilon_1c, self.k])
         return line
 
+
+class stl1_el:
+    def __init__(self, ID, E1, fy):
+        self.ID = ID
+        self.E1 = E1
+        self.fy = fy
+        self.density = 8050 / 10**9 # 8050 kg/m3
+        self.epsilon_y = round(fy / E1,4)
+
+    def adaptic_print(self):
+        return utils.str_joint([self.ID,'stl1', self.E1, self.fy])
+
 class stl1:
     def __init__(self, ID, E1, fy, fu, epsilon_u,softening=False,E3=5):
         self.ID = ID
