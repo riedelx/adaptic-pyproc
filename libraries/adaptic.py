@@ -9,17 +9,37 @@ class adap0: # base class with funtions to read num files
         self.name = name
 
     def readFile(cls, title, cutoff = None,folderPath="",numPath=""): # numPath = str('/num/'), path='data/'
+        # wordsNum=[]
+        # for data in open(folderPath+numPath+title+str(".num"),'r'):
+        #     wordsNum.append(data.split())
+        # if cutoff:
+        #     for i in range(len(wordsNum)):
+        #         try:
+        #             if wordsNum[i][0] == '#io1' and wordsNum[i+2][0] == str(cutoff):
+        #                 break
+        #         except:
+        #             pass
+        #     wordsNum = wordsNum[0:i-2]
+        # return wordsNum
+
+        #update 2021/07/26, cutoff specific steps
         wordsNum=[]
         for data in open(folderPath+numPath+title+str(".num"),'r'):
             wordsNum.append(data.split())
         if cutoff:
+            lineNo = []
             for i in range(len(wordsNum)):
                 try:
-                    if wordsNum[i][0] == '#io1' and wordsNum[i+2][0] == str(cutoff):
-                        break
+                    if wordsNum[i][0] == '#io1':
+                        lineNo.append([int(wordsNum[i+2][0]),i])
                 except:
                     pass
-            wordsNum = wordsNum[0:i-2]
+            cutoff.sort(reverse=True)
+            for i in cutoff:
+                if i==lineNo[-1][0]:
+                    wordsNum=wordsNum[:(lineNo[-1][1]-2)]
+                elif i<lineNo[-1][0]:
+                    del wordsNum[(lineNo[i-1][1]):(lineNo[i][1])]
         return wordsNum
 
     def convertNum(self, wordsNum, phrase, startRow, column, convType):
