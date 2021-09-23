@@ -79,7 +79,9 @@ def name_gen(string,lst, start_ID = 1):
 # utils.ASTR_plot(astr1, ultDispPos, ultDispNeg, 'ASTR curve','displacement [mm]', 'force [kN]', scaleX = 1, scaleY = 1E-3)
 
 def create_ASTR(positive, negative = []):
-    if negative == []:
+    # create_ASTR(np.array([[disp1, f1],[disp2, f2],[disp3, f3]]),negative=np.array([[-disp1, -f1],[-disp2, -f2],[-disp3, -f3]]))
+    # utils.create_ASTR(np.array([[disp1, f1],[disp2, f2],[disp3, f3]]),negative=np.array([['soft']]))
+    if len(negative) == 0:
         negative = np.negative(positive)
     ASTR = ['astr']
     for i in [positive, negative]:
@@ -110,13 +112,12 @@ def create_ASTR(positive, negative = []):
 
 def ASTR_plot(lst, ult_p, ult_n, title, x_label, y_label, scaleX = 1, scaleY = 1,xlim=(None,None),plotSide='both'):
     #lst = lst[1:]
-    positive = lst[0:5]
-    negative = lst[5:10]
+    positive = lst[1:6]
+    negative = lst[6:11]
     positive_bool = True
     for i in [positive, negative]:
         x1 = i[1]
         k1 = i[0]
-        print(k1, x1)
         y1 = k1 * x1
         x2 = i[3]
         k2 = i[2]
@@ -153,7 +154,9 @@ def ASTR_plot(lst, ult_p, ult_n, title, x_label, y_label, scaleX = 1, scaleY = 1
     plt.show()
 
 def astr_gap(gapP,gapN,S1=2.00E+09,S2=1.00E+09,plotting=True,xlim=[20,-20],title='astr gap curve',xlabel='displacement [mm]',ylabel='force [kN]', scaleX = 1, scaleY = 1):
-    # S1, S2 are the stiffnesses after closing the gap
+    # S1, S2 are the stiffnesses after closing the gap, S1 > S2
+    # gapP > 0, gapN < 0 or rigid
+    # utils.astr_gap(9999,-0.001,S1=2E+9,S2=1E+9,plotting=False)
     k,gap=[],[]
     for i in [gapP,gapN]:
         if i=='rigid':
