@@ -107,11 +107,13 @@ class con1:
             self.Ec2 = Ec2
             self.epsilon_2c = (self.fc1-self.fc2)/-Ec2+self.epsilon_1c # was (self.fc1-self.fc2)/-Ec2+self.epsilon_1c
         else:
+            # Method 1
             # epsilon_2c - compressive fracture energy method
             # self.Gc = round(250 * self.Gf, 1)
             # # self.epsilon_2c = round((self.fc1-self.fc2)/-Ec2+self.epsilon_1c, strain_prec)
             # self.epsilon_2c = round(self.epsilon_1c + 3 * self.Gc / (2 * length * fc1), strain_prec)
 
+            # Method 2
             # epsilon_2c - Scott et al. (1982)
             self.epsilon_2c = 0.004 + 0.9*self.Qs*self.fy/300
             self.Ec2 = -(self.fc1-self.fc2)/(self.epsilon_2c - self.epsilon_1c) # secant compressive softening stiffness
@@ -231,6 +233,7 @@ class bond:
         # 4 - Splitting, good bond cond, stirrups
         # 5 - Splitting, all other bond cond, unconfined
         # 6 - Splitting, all other bond cond, stirrups
+        # 7 - Debonded
         self.ID=ID
         self.case=case
         self.f_cm = f_cm # MPa
