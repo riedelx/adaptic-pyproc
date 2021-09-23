@@ -11,7 +11,7 @@ There is no modelling GUI available and it requires specially prepared input fil
 * _ADAPTIC_graphs_ for plotting X-Y graphs.
 * _ADAPTIC_shapes_ for plotting deflected shapes.
 
-The data syntax might be daunting for the new users, whilst for the experienced ones it could be time-consuming. *ADAPTIC PyProc* or aims to make the modelling and analysis easier. In the current revision only 2D modelling available.
+The data syntax might be daunting for the new users, whilst for the experienced ones it could be time-consuming. *ADAPTIC PyProc* or aims to make the modelling and analysis easier. Processing of 2D and 3D models is available.
 
 
 ## Navigation and modules arrangement
