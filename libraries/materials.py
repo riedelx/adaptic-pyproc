@@ -78,53 +78,62 @@ import matplotlib.pyplot as plt
 #         return line
 
 class con1:
-    def __init__(self, ID, fc1, length, fc2_factor = 0.05,epsilon_2t='',characteristic = True, ft_factor=1,Ec2_factor='', Ec2 = '',Et2 = '',strain_prec=5,rev17=True,GfFactor=1,Qs=0.005,fy=500,tensionStiff=False):
+    def __init__(self, ID, fc1, fcm, length, fc2_factor = 0.05, epsilon_2c=0.01, tensionStiff=False, customMaterial=False): # , Ec2_factor=1
         self.resid_str = fc2_factor
         self.ID = ID
         self.fc1 = fc1
         self.fc2 = self.resid_str * fc1
-        self.Qs=Qs # Qst - ratio of volume of transverse reinforcement to volume of concrete core
-        self.fy=fy # fy = yield strength of steel
         self.length = length
         self.density = 2400 / 10**9 # 2400 kg/m3
-        if characteristic:
-            self.fcm = fc1+8
-        else:
-            self.fcm = fc1
+        self.fcm = fcm
         if fc1 <= 50:
-            self.ft = ft_factor*0.3 * self.fcm ** (2/3)
+            self.ft = 0.3 * self.fcm ** (2/3)
         else:
-            self.ft = ft_factor*2.12*np.log(1+0.1*self.fcm)
+            self.ft = 2.12*np.log(1+0.1*self.fcm)
         if tensionStiff: self.ft = self.ft / 2
-        self.Gf = 73 * self.fcm**0.18/1000*GfFactor
-        self.Ec0 = int(21500*(self.fcm/10)**(1/3))
-        self.poisson = 0.2
-        self.Gc = 250 * self.Gf
-        self.epsilon_1c = 5 * fc1 / self.Ec0 /3
-        self.Ec1 = fc1 / self.epsilon_1c
-        self.alphaC = -min(max(0,(self.Ec0 - self.Ec1)/self.Ec1),1)
-        if Ec2 != '':
-            self.Ec2 = Ec2
-            self.epsilon_2c = (self.fc1-self.fc2)/-Ec2+self.epsilon_1c # was (self.fc1-self.fc2)/-Ec2+self.epsilon_1c
-        else:
-            # Method 1
-            # epsilon_2c - compressive fracture energy method
-            # self.Gc = round(250 * self.Gf, 1)
-            # # self.epsilon_2c = round((self.fc1-self.fc2)/-Ec2+self.epsilon_1c, strain_prec)
-            # self.epsilon_2c = round(self.epsilon_1c + 3 * self.Gc / (2 * length * fc1), strain_prec)
+        self.Gf = 73 * self.fcm**0.18/1000
+        self.Ec0 = 21500*(self.fcm/10)**(1/3)
+        # self.poisson = 0.2
 
-            # Method 2
-            # epsilon_2c - Scott et al. (1982)
-            self.epsilon_2c = 0.004 + 0.9*self.Qs*self.fy/300
-            self.Ec2 = -(self.fc1-self.fc2)/(self.epsilon_2c - self.epsilon_1c) # secant compressive softening stiffness
-        if Ec2_factor != '' and Ec2=='':
-            self.Ec2 = self.Ec2*Ec2_factor
-            self.epsilon_2c = (self.fc1-self.fc2)/self.Ec2+self.epsilon_1c
+        # COMPRESSIVE HARDENING
+        # Method 1 - find alpha
+        # self.epsilon_1c = 5 * fc1 / self.Ec0 /3
+        # self.Ec1 = fc1 / self.epsilon_1c
+        # self.alphaC = -min(max(0,(self.Ec0 - self.Ec1)/self.Ec1),1)
+
+        # Method 2 - find Ec
+        self.alphaC = -0.99
+        if customMaterial=='plastic': self.alphaC = -0.99
+        self.Ec1 = self.Ec0 / (np.abs(self.alphaC)+1)
+        self.epsilon_1c =  fc1 / self.Ec1
+        self.Ec1 = fc1 / self.epsilon_1c
+
+        # COMPRESSIVE SOFTENING
+        # Method 1 - compressive fracture energy method
+        self.Gc = 250 * self.Gf * 4
+        # # self.epsilon_2c = (self.fc1-self.fc2)/-self.Ec2+self.epsilon_1c
+        # # self.epsilon_2c = self.epsilon_1c + 3 * self.Gc / (2 * length * fc1)
+        self.epsilon_2c = (self.Gc/self.length-self.epsilon_1c*self.fc1)/((self.fc1+self.fc2)/2)+self.epsilon_1c
+
+        # Method 2 - Scott et al. (1982)
+        # self.epsilon_2c = 0.004 + 0.9*self.Qs*self.fy/300
+
+        # Method 3
+        # self.epsilon_2c = epsilon_2c
+
+        # Finish softening
+        self.Ec2 = -(self.fc1-self.fc2)/(self.epsilon_2c - self.epsilon_1c) # *Ec2_factor # secant compressive softening stiffness
+
+        if customMaterial=='plastic':
+            customMaterial=True
+            self.Ec2 = -1.00E+01
+            self.epsilon_2c = (self.fc1-self.fc2)/-self.Ec2+self.epsilon_1c
+
+        # TENSION
         self.Et1 = self.Ec0
         self.epsilon_1t = self.ft / self.Et1
         self.alphaT = -1
-        if epsilon_2t!='': self.epsilon_2t = epsilon_2t
-        elif tensionStiff:
+        if tensionStiff:
             self.epsilon_2t = 0.001
         else:
             # epsilon_2t
@@ -143,16 +152,18 @@ class con1:
                 self.epsilon_1t = 2 * area_f / self.Et1
                 self.epsilon_2t = 1.1*self.epsilon_1t
         self.epsilon_2t = self.epsilon_2t
-        if Et2 != '':
-            self.Et2 = Et2
-            self.epsilon_2t = (self.ft)/-Et2+self.epsilon_1t
-        else:
-            self.Et2 = - self.ft /(self.epsilon_2t - self.epsilon_1t)
+        self.Et2 = - self.ft /(self.epsilon_2t - self.epsilon_1t)
+
+        if customMaterial:
+            self.Et2 = -1E+1
+            self.ft = 0.1
+
 
         self.adaptic = [self.Ec1,self.fc1,self.Ec2,self.fc2,self.Et1,self.ft,self.Et2,self.alphaC,self.alphaT]
 
     def adaptic_print(self,rawNr=False):
-        return utils.str_joint([self.ID,'con1', self.Ec1, self.fc1, self.Ec2, self.fc2, self.Et1, self.ft, self.Et2, self.alphaC, self.alphaT])
+        if not rawNr: return utils.str_joint([self.ID,'con1', self.Ec1, self.fc1, self.Ec2, self.fc2, self.Et1, self.ft, self.Et2, self.alphaC, self.alphaT])
+        else: return [self.ID,'con1', self.Ec1, self.fc1, self.Ec2, self.fc2, self.Et1, self.ft, self.Et2, self.alphaC, self.alphaT]
 
     def data_frame(self):
         data = np.array([[self.ID, self.length, self.fc1, self.fc2, self.ft, self.Ec0, self.Ec1,
@@ -224,7 +235,7 @@ class stl1:
         else: return 0
 
 class bond:
-    def __init__(self,ID,c,f_cm,ft,L,dia,n_bars,case=0,redFact=1):
+    def __init__(self,ID,c,f_cm,ft,L,dia,n_bars,case=1,redFact=1):
         # case - refer to Table 6.1-1 MC2010:
         # 0 - Marti
         # 1 - Pull-out, good bond
@@ -237,61 +248,116 @@ class bond:
         self.ID=ID
         self.case=case
         self.f_cm = f_cm # MPa
-        self.ft=ft
+        self.c = c
         self.L=L
         self.dia=dia
         self.n_bars=n_bars
         self.redFact=redFact
-        if self.case ==0: # Marti
-            self.tau_max = self.ft * redFact
-            self.s_1 = 0.001 # mm
-            self.s_2 = 2 # mm
-            self.s_3 = c # mm, clear distance between ribs
-            self.tau_bf = self.ft * redFact
-        elif self.case ==1:
-            self.tau_max = 2.5 * self.f_cm**0.5 * redFact
+
+    def slip2tau(self,s):
+        if 0 <= s <= self.s_1:
+            tau = self.tau_max*(s/self.s_1_original)**self.alpha
+        elif self.s_1 <= s <= self.s_2:
+            tau = self.tau_bu_split
+        elif self.s_2 <= s <= self.s_3:
+            tau = self.tau_bu_split - (self.tau_bu_split-self.tau_bf)*(s-self.s_2)/(self.s_3-self.s_2)
+        else:
+            tau = self.tau_bf
+        return tau
+
+    def create_ASTR(self):
+        if self.case == 1 or self.case == 2 or self.case == 4 or self.case == 6:
+            disp1,disp2,disp3,f1,f2,f3 = self.s_1,self.s_3,self.s_3*1.1,self.tau_bu_split,self.tau_bf,self.tau_bf
+            self.astr_stress = utils.create_ASTR(np.array([[disp1, f1],[disp2, f2],[disp3, f3]]),negative=np.array([[-disp1, -f1],[-disp2, -f2],[-disp3, -f3]]))
+        else:
+            disp1,disp2,disp3,f1,f2,f3 = 0.2*self.s_1,self.s_1,self.s_3,self.slip2tau(0.2*self.s_1),self.tau_bu_split,self.tau_bf
+            self.astr_stress = utils.create_ASTR(np.array([[disp1, f1],[disp2, f2],[disp3, f3]]),negative=np.array([[-disp1, -f1],[-disp2, -f2],[-disp3, -f3]]))
+
+        # self.ft=ft # only for Marti
+        # if self.case ==0: # Marti
+        #     slip = 2 #dia*500**2/(8*210000*2*self.ft) # Alogla slip p 148
+        #     self.tau_max = 2*self.ft * self.redFact
+        #     self.s_1 = slip/2 # mm
+        #     self.s_2 = slip # mm
+        #     self.s_3 = slip # mm
+        #     self.tau_bf = self.ft * self.redFact
+        #     disp1,disp2,disp3,f1,f2,f3 = self.s_1,self.s_3,self.s_3+1,self.tau_max,self.tau_bf,self.tau_bf
+        #     self.astr_stress = utils.create_ASTR(np.array([[disp1, f1],[disp2, f2],[disp3, f3]]),negative=np.array([[-disp1, -f1],[-disp2, -f2],[-disp3, -f3]]))
+    def generateBond(self):
+        if self.case ==1:
+            self.tau_max = 2.5 * self.f_cm**0.5 * self.redFact
+            self.tau_bu_split = self.tau_max
             self.s_1 = 1 # mm
+            self.s_1_original = self.s_1
             self.s_2 = 2 # mm
-            self.s_3 = c # mm, clear distance between ribs
+            self.s_3 = self.c # mm, clear distance between ribs
             self.alpha = 0.4
             self.tau_bf = 0.4 * self.tau_max
+            self.create_ASTR()
+        elif self.case ==2:
+            self.tau_max = 2.5 * self.f_cm**0.5 * self.redFact
+            self.tau_bu_split = self.tau_max
+            self.s_1 = 1.8 # mm
+            self.s_1_original = self.s_1
+            self.s_2 = 3.6 # mm
+            self.s_3 = self.c # mm, clear distance between ribs
+            self.alpha = 0.4
+            self.tau_bf = 0.4 * self.tau_max
+            self.create_ASTR()
+        elif self.case ==3:
+            self.tau_max = 2.5 * self.f_cm**0.5
+            self.tau_bu_split = 7*(self.f_cm/25)**0.25 * self.redFact
+            self.alpha = 0.4
+            self.tau_bf = 0
+            self.s_1_original = 1
+            x = np.linspace(0,self.s_1_original,1000)
+            y = [self.tau_max*(s/self.s_1_original)**self.alpha for s in x]
+            self.s_1 = utils.findExactPoint([x,y], self.tau_bu_split, limY=True)[0]
+            self.s_2 = self.s_1 # mm
+            self.s_3 = 1.2 * self.s_1 # mm
+            self.create_ASTR()
         elif self.case ==4:
             self.tau_max = 2.5 * self.f_cm**0.5
-            self.tau_bu_split=8*(f_cm/25)**0.25 * redFact
-            self.s_1 = 1/self.tau_max*self.tau_bu_split # mm
-            #self.s_2 = self.s_1 # mm
-            self.s_3 = 0.5 * c # mm
+            self.tau_bu_split = 8*(self.f_cm/25)**0.25 * self.redFact
             self.alpha = 0.4
             self.tau_bf = 0.4 * self.tau_bu_split
-        else: print('Case error')
-    def slip2tau(self,s):
-        if self.case ==1:
-            if 0 <= s <= self.s_1:
-                tau = self.tau_max*(s/self.s_1)**self.alpha
-            elif self.s_1 <= s <= self.s_2:
-                tau = self.tau_max
-            elif self.s_2 <= s <= self.s_3:
-                tau = self.tau_max - (self.tau_max-self.tau_bf)*(s-self.s_2)/(self.s_3-self.s_2)
-            else:
-                tau = self.tau_bf
-        elif self.case ==0:
-            if 0 <= s <= self.s_1:
-                tau = self.tau_max #*(s/self.s_1)
-            else:
-                tau = self.tau_bf
-        elif self.case ==4:
-            if 0 <= s <= self.s_1:
-                tau = self.tau_bu_split*(s/self.s_1)**self.alpha
-            elif self.s_1 <= s <= self.s_3:
-                tau = self.tau_bu_split - (self.tau_bu_split-self.tau_bf)*(s-self.s_1)/(self.s_3-self.s_1)
-            else:
-                tau = self.tau_bf
-        return tau
+            self.s_1_original = 1
+            x = np.linspace(0,self.s_1_original,1000)
+            y = [self.tau_max*(s/self.s_1_original)**self.alpha for s in x]
+            self.s_1 = utils.findExactPoint([x,y], self.tau_bu_split, limY=True)[0]
+            self.s_2 = self.s_1 # mm
+            self.s_3 = 0.5 * self.c # mm
+            self.create_ASTR()
+        elif self.case ==5:
+            self.tau_max = 1.25 * self.f_cm**0.5
+            self.tau_bu_split = 5*(self.f_cm/25)**0.25 * self.redFact
+            self.alpha = 0.4
+            self.tau_bf = 0
+            self.s_1_original = 1.8
+            x = np.linspace(0,self.s_1_original,1000)
+            y = [self.tau_max*(s/self.s_1_original)**self.alpha for s in x]
+            self.s_1 = utils.findExactPoint([x,y], self.tau_bu_split, limY=True)[0]
+            self.s_2 = self.s_1 # mm
+            self.s_3 = 1.2 * self.s_1 # mm
+            self.create_ASTR()
+        elif self.case ==6:
+            self.tau_max = 1.25 * self.f_cm**0.5
+            self.tau_bu_split = 5.5*(self.f_cm/25)**0.25 * self.redFact
+            self.alpha = 0.4
+            self.tau_bf = 0.4 * self.tau_bu_split
+            self.s_1_original = 1.8
+            x = np.linspace(0,self.s_1_original,1000)
+            y = [self.tau_max*(s/self.s_1_original)**self.alpha for s in x]
+            self.s_1 = utils.findExactPoint([x,y], self.tau_bu_split, limY=True)[0]
+            self.s_2 = self.s_1 # mm
+            self.s_3 = 0.5 * self.c # mm
+            self.create_ASTR()
+        else: print('Case error: {}'.format(self.case))
     def force2tau(self,force):
-        return force/(self.n_bars*self.dia*np.pi*self.L)
+        return list(np.array(force)/(self.n_bars*self.dia*np.pi*self.L))
     def tau2force(self,tau):
-        return tau*(self.n_bars*self.dia*np.pi*self.L)
-    def curve(self,stop=9,num=50,title='bond stress–slip relationship',astrPlot=True,label1='MC2010',label2='ASTR'):
+        return list(np.array(tau)*(self.n_bars*self.dia*np.pi*self.L))
+    def curve(self,stop=9,num=1000,title='bond stress–slip relationship',astrPlot=True,label1='MC2010',label2='ASTR', returnData = False):
         fig = plt.figure(figsize = (6,4))
         ax = fig.add_subplot(111)
         ax.grid(which='major', linestyle=':', linewidth='0.5', color='black')
@@ -299,10 +365,8 @@ class bond:
         y=[self.slip2tau(i) for i in x]
         ax.plot(x,y,'-', linewidth=2, markersize=5,label=label1)
         if astrPlot:
-            disp1 = self.s_1
-            disp2 = self.s_3
-            disp3 = stop
-            ax.plot([0,disp1,disp2,disp3],[0,self.slip2tau(disp1),self.slip2tau(disp2),self.slip2tau(disp3)],'-', linewidth=2, markersize=5,label=label2)
+            ASTR_xy = utils.ASTR_plot(self.astr_stress, stop, -stop, plotSide='positive', returnData = True)
+            plt.plot(ASTR_xy[:,0],ASTR_xy[:,1])
             ax.legend()
         ax.set_title(title)
         ax.set_xlabel('Slip [mm]')
@@ -310,27 +374,28 @@ class bond:
         ax.set_xlim(0,None)
         ax.set_ylim(0,None)
         plt.show()
-    def astr_curve(self):
-        disp1 = self.s_1
-        disp2 = self.s_3
-        disp3 = self.s_3+1
-        f1 = self.tau2force(self.slip2tau(disp1))
-        f2 = self.tau2force(self.slip2tau(disp2))
-        f3 = self.tau2force(self.slip2tau(disp3))
+        if returnData: return [x,y]
+    def astr_force(self,stop=0):
+        if stop == 0: stop=self.s_3*1.1
+        ASTR_x = utils.ASTR_plot(self.astr_stress, stop, 0, plotSide='positive', returnData = True)[:,0][1:]
+        ASTR_y = utils.ASTR_plot(self.astr_stress, stop, 0, plotSide='positive', returnData = True)[:,1][1:]
+        disp1,disp2,disp3,disp4 = ASTR_x
+        f1,f2,f3,f4 = self.tau2force(ASTR_y)
         #np.array([[disp1, f1],[disp2, f2],[disp3, f3]]
-        return f1,f2,f3,disp1,disp2,disp3
+        return utils.create_ASTR(np.array([[disp1, f1],[disp2, f2],[disp3, f3]]),negative=np.array([[-disp1, -f1],[-disp2, -f2],[-disp3, -f3]]))
     def dataframe(self):
         return pd.DataFrame([[self.s_1,self.s_2,self.s_3,self.slip2tau(self.s_1),self.slip2tau(self.s_2),self.slip2tau(self.s_3)]],columns=['s_1','s_2','s_3','t_1','t_2','t_3'])
-    def curve_force(self,stop=9,num=50,title='bond force–slip relationship',label1='MC2010',label2='ASTR'):
+    def curve_force(self,stop=9,num=1000,title='bond force–slip relationship',label1='MC2010',label2='ASTR', returnData = False):
         fig = plt.figure(figsize = (6,4))
         ax = fig.add_subplot(111)
         ax.grid(which='major', linestyle=':', linewidth='0.5', color='black')
         x=np.linspace(0, stop, num)
-        y=[(self.tau2force(self.slip2tau(i)))/1000 for i in x]
-        if self.case ==0: ax.plot(x,y,'-', linewidth=2, markersize=5,label='ft')
-        else: ax.plot(x,y,'-', linewidth=2, markersize=5,label=label1)
-        f1,f2,f3,disp1,disp2,disp3=self.astr_curve()
-        ax.plot([0,disp1,disp2,disp3],[0,f1/1000,f2/1000,f3/1000],'-', linewidth=2, markersize=5,label=label2)
+        y=[self.tau2force([self.slip2tau(i)])[0]/1000 for i in x]
+        ax.plot(x,y,'-', linewidth=2, markersize=5,label=label1)
+        astr_force=self.astr_force(stop=stop)
+        ASTR_x = utils.ASTR_plot(astr_force, stop, 0, plotSide='positive', returnData = True)[:,0]
+        ASTR_y = np.array(utils.ASTR_plot(astr_force, stop, 0, plotSide='positive', returnData = True)[:,1])/1000
+        ax.plot(ASTR_x,ASTR_y,'-', linewidth=2, markersize=5,label=label2)
         ax.legend()
         ax.set_title(title)
         ax.set_xlabel('Slip [mm]')
@@ -338,7 +403,8 @@ class bond:
         ax.set_xlim(0,None)
         ax.set_ylim(0,None)
         plt.show()
-    def adaptic_print(self):
+        if returnData: return [x,y]
+    def adaptic_print(self): # real values
         s_e=0.5*self.s_1
         return utils.str_joint([self.ID,'bond', s_e, self.s_1, self.s_2, self.s_3,self.slip2tau(s_e),self.slip2tau(self.s_1),self.slip2tau(self.s_3)])
 
@@ -362,7 +428,7 @@ class bond:
 
 class stmdl2:
     # this is con1 ADAPTIC model
-    def __init__(self,ec0,muec1,strnc1,stresc1,et0,muet1,strnt1,alphac,alphat,pseto=0,crkso=0,strain_prec=5, ID='stmdl2'):#pseto,crkso,
+    def __init__(self,ec0,muec1,strnc1,stresc1,et0,muet1,strnt1,alphac,alphat,pseto=0,crkso=0,ID='stmdl2'):#pseto,crkso,
         # This subroutine calculates the stress at a monitoring point for
         # material MODEL(2).
 
@@ -384,13 +450,13 @@ class stmdl2:
 
         self.ID = ID
         # Derived, not used in stress
-        self.ec0t=round((1+np.abs(alphac))*ec0) # secant compressive stiffness
-        self.strnc0=round((stresc1-muec1*strnc1)/(ec0-muec1),strain_prec) # strain at peak compressive strength
-        self.stresc0=round(self.strnc0*self.ec0,1) # peak compressive strength
-        self.strnt0=round(-muet1*strnt1/(et0-muet1),strain_prec) # strain at peak tensile strength
-        if alphat>0: self.et0t=round((1+np.abs(alphat))*et0) # secant tensile stiffness
+        self.ec0t=(1+np.abs(alphac))*ec0 # secant compressive stiffness
+        self.strnc0=(stresc1-muec1*strnc1)/(ec0-muec1) # strain at peak compressive strength
+        self.stresc0=self.strnc0*self.ec0 # peak compressive strength
+        self.strnt0=-muet1*strnt1/(et0-muet1) # strain at peak tensile strength
+        if alphat>0: self.et0t=(1+np.abs(alphat))*et0 # secant tensile stiffness
         else: self.et0t=et0
-        self.ft=round(self.et0*self.strnt0,1) # peak tensile strength
+        self.ft=self.et0*self.strnt0 # peak tensile strength
 
         data = np.array([[self.ID,self.stresc0, self.stresc1, self.ft, self.ec0t, self.ec0,
                           self.muec1, self.et0, self.muet1, self.strnc0,
