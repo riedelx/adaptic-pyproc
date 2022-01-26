@@ -178,7 +178,7 @@ def astr_gap(gapP,gapN,S1=2.00E+09,S2=1.00E+09,plotting=True,xlim=[20,-20],title
             k.append(1.00E+09)
             gap.append(0.1)
         else:
-            k.append(0)
+            k.append(0.1)
             gap.append(np.abs(i))
     curve=['astr']+[S1, 0.00E+00, k[0], gap[0], S2]+[S1, 0.00E+00, k[1], -gap[1], S2]
     if plotting:
