@@ -85,19 +85,25 @@ class con1:
         self.fc2 = self.resid_str * fc1
         self.length = length
         self.density = 2400 / 10**9 # 2400 kg/m3
-        self.fcm = fcm
+        self.fcm = fc1
         if fc1 <= 50:
             self.ft = 0.3 * self.fcm ** (2/3)
         else:
             self.ft = 2.12*np.log(1+0.1*self.fcm)
         if tensionStiff: self.ft = self.ft / 2
         self.Gf = 73 * self.fcm**0.18/1000
-        self.Ec0 = 21500*(self.fcm/10)**(1/3)
+        self.Ec0 = 21500*(self.fc1/10)**(1/3)
         # self.poisson = 0.2
 
         # COMPRESSIVE HARDENING
-        # Method 1 - find alpha
+        # Method 1a - find alpha
         # self.epsilon_1c = 5 * fc1 / self.Ec0 /3
+        # self.Ec1 = fc1 / self.epsilon_1c
+        # self.alphaC = -min(max(0,(self.Ec0 - self.Ec1)/self.Ec1),1)
+
+        # COMPRESSIVE HARDENING
+        # Method 1b - find alpha MC2010
+        # self.epsilon_1c = 0.0026
         # self.Ec1 = fc1 / self.epsilon_1c
         # self.alphaC = -min(max(0,(self.Ec0 - self.Ec1)/self.Ec1),1)
 
@@ -235,7 +241,7 @@ class stl1:
         else: return 0
 
 class bond:
-    def __init__(self,ID,c,f_cm,ft,L,dia,n_bars,case=1,redFact=1):
+    def __init__(self,ID,c,f_cm,L,dia,n_bars,case=1,redFact=1,fu=550,fy=500):
         # case - refer to Table 6.1-1 MC2010:
         # 0 - Marti
         # 1 - Pull-out, good bond
@@ -253,6 +259,9 @@ class bond:
         self.dia=dia
         self.n_bars=n_bars
         self.redFact=redFact
+        self.fy = fy
+        self.fu = fu
+        self.bondReduction = (2-fu/fy)**2
 
     def slip2tau(self,s):
         if 0 <= s <= self.s_1:
