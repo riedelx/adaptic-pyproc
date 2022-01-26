@@ -23,6 +23,26 @@ class adap0: # base class with funtions to read num files
         # return wordsNum
 
         #update 2021/07/26, cutoff specific steps
+        # wordsNum=[]
+        # for data in open(folderPath+numPath+title+str(".num"),'r'):
+        #     wordsNum.append(data.split())
+        # if cutoff:
+        #     lineNo = []
+        #     for i in range(len(wordsNum)):
+        #         try:
+        #             if wordsNum[i][0] == '#io1':
+        #                 lineNo.append([int(wordsNum[i+2][0]),i])
+        #         except:
+        #             pass
+        #     cutoff.sort(reverse=True)
+        #     for i in cutoff:
+        #         if i==lineNo[-1][0]:
+        #             wordsNum=wordsNum[:(lineNo[-1][1]-2)]
+        #         elif i<lineNo[-1][0]:
+        #             del wordsNum[(lineNo[i-1][1]):(lineNo[i][1])]
+        # return wordsNum
+
+        # update 2021/11/17, cutoff specific steps
         wordsNum=[]
         for data in open(folderPath+numPath+title+str(".num"),'r'):
             wordsNum.append(data.split())
@@ -34,12 +54,11 @@ class adap0: # base class with funtions to read num files
                         lineNo.append([int(wordsNum[i+2][0]),i])
                 except:
                     pass
-            cutoff.sort(reverse=True)
-            for i in cutoff:
-                if i==lineNo[-1][0]:
-                    wordsNum=wordsNum[:(lineNo[-1][1]-2)]
-                elif i<lineNo[-1][0]:
-                    del wordsNum[(lineNo[i-1][1]):(lineNo[i][1])]
+            steps=list(list(zip(*lineNo))[0])
+            line=list(list(zip(*lineNo))[1])
+            if cutoff<=0: del wordsNum[(line[steps[cutoff]-1]-2):]
+            elif steps[-1] > cutoff:
+                del wordsNum[(line[steps.index(cutoff)]-2):]
         return wordsNum
 
     def convertNum(self, wordsNum, phrase, startRow, column, convType):
@@ -373,13 +392,13 @@ class adaptic3D(adap1):
         del temp1, temp2
 
     def nodeDispZ_create(self):
-        self.nodeDispRZ = self.convertNum(self.wordsNum,"#in2",3,3,"float")
+        self.nodeDispZ = self.convertNum(self.wordsNum,"#in2",3,3,"float")
 
     def nodeDispRX_create(self):
-        self.nodeDispRZ = self.convertNum(self.wordsNum,"#in2",3,4,"float")
+        self.nodeDispRX = self.convertNum(self.wordsNum,"#in2",3,4,"float")
 
     def nodeDispRY_create(self):
-        self.nodeDispRZ = self.convertNum(self.wordsNum,"#in2",3,5,"float")
+        self.nodeDispRY = self.convertNum(self.wordsNum,"#in2",3,5,"float")
 
     def nodeDispRZ_create(self):
         self.nodeDispRZ = self.convertNum(self.wordsNum,"#in2",3,6,"float")
@@ -414,7 +433,7 @@ class adaptic3D(adap1):
 
     def cbpThz1_create(self):
         self.hasAttribute("cbpName")
-        self.cbpThz1 = self.convertNum(self.wordsNum,"#ie1d1",3,2,"float")
+        self.cbpThz1 = self.convertNum(self.wordsNum,"#ie31d1",3,2,"float")
 
     def cbpThy2_create(self):
         self.hasAttribute("cbpName")
@@ -422,15 +441,15 @@ class adaptic3D(adap1):
 
     def cbpThz2_create(self):
         self.hasAttribute("cbpName")
-        self.cbpThz2 = self.convertNum(self.wordsNum,"#ie1d1",3,4,"float")
+        self.cbpThz2 = self.convertNum(self.wordsNum,"#ie31d1",3,4,"float")
 
     def cbpDelta_create(self):
         self.hasAttribute("cbpName")
-        self.cbpDelta = self.convertNum(self.wordsNum,"#ie1d1",3,5,"float")
+        self.cbpDelta = self.convertNum(self.wordsNum,"#ie31d1",3,5,"float")
 
     def cbpTheta_create(self):
         self.hasAttribute("cbpName")
-        self.cbpTheta = self.convertNum(self.wordsNum,"#ie1d1",3,6,"float")
+        self.cbpTheta = self.convertNum(self.wordsNum,"#ie31d1",3,6,"float")
 
     def restrainedRZ_create(self):
         self.hasAttribute("restrainedName")
