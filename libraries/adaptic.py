@@ -403,6 +403,22 @@ class adaptic3D(adap1):
     def nodeDispRZ_create(self):
         self.nodeDispRZ = self.convertNum(self.wordsNum,"#in2",3,6,"float")
 
+    def restrainedZ_create(self):
+        self.hasAttribute("restrainedName")
+        self.restrainedZ = self.convertNum(self.wordsNum,"#in1",3,3,"float")
+
+    def restrainedRX_create(self):
+        self.hasAttribute("restrainedName")
+        self.restrainedRX = self.convertNum(self.wordsNum,"#in1",3,4,"float")
+
+    def restrainedRY_create(self):
+        self.hasAttribute("restrainedName")
+        self.restrainedRY = self.convertNum(self.wordsNum,"#in1",3,5,"float")
+
+    def restrainedRZ_create(self):
+        self.hasAttribute("restrainedName")
+        self.restrainedRZ = self.convertNum(self.wordsNum,"#in1",3,6,"float")
+
     def cbpMy1_create(self):
         self.hasAttribute("cbpName")
         self.cbpMy1 = self.convertNum(self.wordsNum,"#ie31",3,1,"float")
@@ -450,10 +466,6 @@ class adaptic3D(adap1):
     def cbpTheta_create(self):
         self.hasAttribute("cbpName")
         self.cbpTheta = self.convertNum(self.wordsNum,"#ie31d1",3,6,"float")
-
-    def restrainedRZ_create(self):
-        self.hasAttribute("restrainedName")
-        self.restrainedRZ = self.convertNum(self.wordsNum,"#in1",3,3,"float")
 
     def jelFx_create(self):
         self.hasAttribute("jelName")
